@@ -393,10 +393,11 @@ function lookupId() {
 
             document.getElementById('result-card').classList.add('show');
         })
-        .catch(() => {
+        .catch(err => {
+            console.error('Checkin fetch error:', err);
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-search"></i> Find';
-            document.getElementById('error-text').textContent = 'Cannot connect to server. Check WiFi connection.';
+            document.getElementById('error-text').textContent = 'Server connection failed. Please reload the page at http://localhost:5000/checkin';
             document.getElementById('error-msg').classList.add('show');
         });
 }
@@ -448,7 +449,7 @@ document.getElementById('reg-id-input').addEventListener('input', function() {
     let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (v.length > 4)  v = v.slice(0,4)  + '-' + v.slice(4);
     if (v.length > 8)  v = v.slice(0,8)  + '-' + v.slice(8);
-    if (v.length > 14) v = v.slice(0,14);
+    if (v.length > 15) v = v.slice(0,15);
     this.value = v;
 });
 
