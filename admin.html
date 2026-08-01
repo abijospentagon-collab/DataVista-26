@@ -521,8 +521,9 @@ document.getElementById('login-form').addEventListener('submit', async function(
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         }
-    } catch {
-        document.getElementById('login-error-text').textContent = 'Server unreachable.';
+    } catch (err) {
+        console.error('Login error:', err);
+        document.getElementById('login-error-text').textContent = 'Server unreachable. Please reload http://localhost:5000/admin';
         errBox.classList.add('show');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
