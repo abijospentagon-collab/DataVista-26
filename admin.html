@@ -374,7 +374,7 @@
                                 <th>#</th><th>Reg. ID</th><th>Event</th><th>College</th><th>Department</th>
                                 <th>Participant 1</th><th>Email 1</th>
                                 <th>Participant 2</th><th>Email 2</th>
-                                <th>Phone</th><th>Additional Info</th><th>Registered On</th>
+                                <th>Phone</th><th>Registered On</th>
                                 <th>Check-In</th><th>Check-In Time</th>
                                 <th>Action</th>
                             </tr>
@@ -613,7 +613,6 @@ function renderTable(rows) {
             <td>${row[6]??''}</td>
             <td style="font-weight:600;color:var(--text)">${row[7]??''}</td>
             <td>${row[8]??''}</td><td>${row[9]??''}</td>
-            <td style="color:var(--gold-light)">${row[10]??'—'}</td>
             <td style="color:var(--text-muted);white-space:nowrap">${row[11]??''}</td>
             <td>${statusBadge}</td>
             <td style="color:var(--text-muted);font-size:.78rem;white-space:nowrap">${row[13]??''}</td>

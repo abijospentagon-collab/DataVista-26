@@ -28,10 +28,10 @@ HEADERS = [
     'S.No', 'Reg. ID', 'Event', 'College', 'Department',
     'Participant 1 Name', 'Participant 1 Email',
     'Participant 2 Name', 'Participant 2 Email',
-    'Phone', 'Additional Info', 'Registered On',
+    'Phone', 'Registered On',
     'Check-In Status', 'Check-In Time'
 ]
-COL_WIDTHS = [6, 18, 20, 28, 22, 26, 32, 26, 32, 16, 28, 22, 15, 20]
+COL_WIDTHS = [6, 18, 20, 28, 22, 26, 32, 26, 32, 16, 22, 15, 20]
 
 # Column indices (0-based)
 IDX_SNO      = 0
@@ -44,10 +44,9 @@ IDX_P1EMAIL  = 6
 IDX_P2NAME   = 7
 IDX_P2EMAIL  = 8
 IDX_PHONE    = 9
-IDX_INFO     = 10
-IDX_REG_TIME = 11
-IDX_STATUS   = 12
-IDX_CHKTIME  = 13
+IDX_REG_TIME = 10
+IDX_STATUS   = 11
+IDX_CHKTIME  = 12
 
 EVENT_CODES = {
     'Pitch The Deck': 'PTD',
@@ -279,7 +278,6 @@ def build_confirmation_email(d, reg_id, checkin_url):
         row('Participant 1', d['p1name']) +
         row('Participant 2', d['p2name']) +
         row('Phone',         d['phone']) +
-        (row(d.get('extraLabel', 'Extra'), d['additionalInfo']) if d.get('additionalInfo') else '') +
         row('Registered On', datetime.now().strftime('%d %B %Y, %H:%M'))
     )
 
@@ -473,7 +471,7 @@ def api_register():
             d['event'].strip(), d['college'].strip(), d['department'].strip(),
             d['p1name'].strip(), d['p1email'].strip(),
             d['p2name'].strip(), d['p2email'].strip(),
-            d['phone'].strip(), d.get('additionalInfo','').strip(),
+            d['phone'].strip(),
             datetime.now().strftime('%d-%m-%Y %H:%M'),
             'Pending', ''
         ])

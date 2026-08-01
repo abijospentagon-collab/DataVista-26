@@ -1,15 +1,5 @@
 {
-  "entries": [
-    {
-      "id": 4,
-      "reg_id": "DV26-PTD-OO5TM",
-      "event": "Pitch The Deck",
-      "college": "SRM",
-      "team": "kathir & Vimal",
-      "score": 0,
-      "timestamp": "01-08-2026 09:07"
-    }
-  ],
-  "next_id": 5,
-  "last_updated": "01-08-2026 09:46"
+  "entries": [],
+  "next_id": 6,
+  "last_updated": "01-08-2026 12:19"
 }

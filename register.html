@@ -486,18 +486,7 @@
                             </div>
                         </div>
 
-                        <!-- Additional info (event-specific) -->
-                        <div class="additional-block" id="additional-block">
-                            <div class="section-divider"><span><i class="fas fa-info-circle"></i> &nbsp;Event Details</span></div>
-                            <div class="form-grid full">
-                                <div class="field" id="additional-field-wrap">
-                                    <label id="additional-label">Additional Info</label>
-                                    <select id="additionalInfo">
-                                        <option value="">Select...</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+
 
                         <!-- Error -->
                         <div class="error-msg" id="error-msg">
@@ -573,19 +562,6 @@
             `<i class="fas fa-clock"></i> ${meta.time}`;
     }
 
-    // Populate extra field if needed
-    if (meta.hasExtra) {
-        const block = document.getElementById('additional-block');
-        block.classList.add('visible');
-        document.getElementById('additional-label').textContent = meta.extraLabel + ' *';
-        const sel = document.getElementById('additionalInfo');
-        meta.extraOptions.forEach(opt => {
-            const o = document.createElement('option');
-            o.value = o.textContent = opt;
-            sel.appendChild(o);
-        });
-    }
-
     // ── Form submission ─────────────────────────────────
     document.getElementById('reg-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -597,15 +573,14 @@
 
         // Gather values
         const data = {
-            event          : eventName,
-            college        : document.getElementById('college').value.trim(),
-            department     : document.getElementById('department').value.trim(),
-            phone          : document.getElementById('phone').value.trim(),
-            p1name         : document.getElementById('p1name').value.trim(),
-            p1email        : document.getElementById('p1email').value.trim(),
-            p2name         : document.getElementById('p2name').value.trim(),
-            p2email        : document.getElementById('p2email').value.trim(),
-            additionalInfo : document.getElementById('additionalInfo').value.trim()
+            event      : eventName,
+            college    : document.getElementById('college').value.trim(),
+            department : document.getElementById('department').value.trim(),
+            phone      : document.getElementById('phone').value.trim(),
+            p1name     : document.getElementById('p1name').value.trim(),
+            p1email    : document.getElementById('p1email').value.trim(),
+            p2name     : document.getElementById('p2name').value.trim(),
+            p2email    : document.getElementById('p2email').value.trim()
         };
 
         // Basic validation
@@ -620,11 +595,6 @@
         const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRe.test(data.p1email) || !emailRe.test(data.p2email)) {
             errText.textContent = 'Please enter valid email addresses.';
-            errBox.classList.add('show');
-            return;
-        }
-        if (meta.hasExtra && !data.additionalInfo) {
-            errText.textContent = `Please select a ${meta.extraLabel}.`;
             errBox.classList.add('show');
             return;
         }
