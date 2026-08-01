@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — DATA VISTA '26</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --gold:#D4A843; --gold-light:#F0C96A; --gold-dark:#9A7420;
+            --maroon:#6B0F2A; --maroon-dark:#3D0818; --maroon-deep:#150208;
+            --bg:#0E0206; --card-bg:rgba(25,4,14,0.9);
+            --border:rgba(212,168,67,0.16); --border-h:rgba(212,168,67,0.38);
+            --text:#F5ECD7; --text-sec:rgba(245,236,215,0.72); --text-muted:rgba(245,236,215,0.42);
+            --gold-grad:linear-gradient(135deg,#F0C96A,#9A7420);
+            --danger:#E87070; --success:#4ADE80;
+        }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        /* ─── LOGIN ─── */
+        #login-screen {
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(107,15,42,.6) 0%,transparent 70%),var(--bg);
+        }
+        .login-card {
+            width:100%; max-width:420px; padding:2.75rem 2.25rem;
+            background:var(--card-bg); border:1px solid var(--border);
+            border-radius:20px; backdrop-filter:blur(20px);
+            animation:slideUp .45s ease both;
+        }
+        @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .login-logo { display:flex; flex-direction:column; align-items:center; gap:.6rem; margin-bottom:2rem; }
+        .login-logo .icon {
+            width:60px; height:60px; border-radius:50%;
+            background:rgba(212,168,67,.1); border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center; font-size:1.4rem;
+        }
+        .login-logo .icon i { color:var(--gold); }
+        .login-logo h1 {
+            font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:900;
+            background:var(--gold-grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text; text-align:center;
+        }
+        .login-logo p { font-size:.78rem; color:var(--text-muted); }
+        .lf { display:flex; flex-direction:column; gap:6px; margin-bottom:1rem; }
+        .lf label { font-size:.75rem; font-weight:600; color:var(--gold-light); text-transform:uppercase; letter-spacing:.05em; }
+        .lf .iw { position:relative; }
+        .lf .iw i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.85rem; }
+        .lf input {
+            width:100%; padding:.8rem 1rem .8rem 2.75rem;
+            background:rgba(255,255,255,.04); border:1px solid var(--border);
+            border-radius:10px; color:var(--text); font-size:.9rem;
+            font-family:'Inter',sans-serif; outline:none; transition:all .2s;
+        }
+        .lf input:focus { border-color:var(--gold); background:rgba(212,168,67,.06); box-shadow:0 0 0 3px rgba(212,168,67,.12); }
+        .lf input::placeholder { color:var(--text-muted); }
+        .btn-login {
+            width:100%; padding:.9rem; margin-top:.5rem;
+            background:var(--gold-grad); color:var(--maroon-deep);
+            border:none; border-radius:12px; font-size:.95rem; font-weight:800;
+            font-family:'Orbitron',sans-serif; letter-spacing:.04em;
+            cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(212,168,67,.35);
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-login:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 28px rgba(212,168,67,.5); }
+        .btn-login:disabled { opacity:.6; cursor:not-allowed; }
+        .login-error {
+            display:none; margin-top:.75rem; padding:.75rem 1rem;
+            background:rgba(200,50,50,.12); border:1px solid rgba(200,50,50,.28);
+            border-radius:8px; color:var(--danger); font-size:.83rem; align-items:center; gap:8px;
+        }
+        .login-error.show { display:flex; }
+
+        /* ─── DASHBOARD ─── */
+        #dashboard { display:none; min-height:100vh; flex-direction:column; }
+
+        .dash-topbar {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:1rem 2rem; background:rgba(18,3,8,.92);
+            border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+            position:sticky; top:0; z-index:100;
+        }
+        .dash-logo {
+            font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900;
+            background:var(--gold-grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+            display:flex; align-items:center; gap:10px;
+        }
+        .dash-right { display:flex; align-items:center; gap:.75rem; }
+        .btn-dl {
+            display:flex; align-items:center; gap:7px; padding:.6rem 1.25rem;
+            background:var(--gold-grad); color:var(--maroon-deep);
+            border:none; border-radius:8px; font-size:.82rem; font-weight:700;
+            cursor:pointer; transition:all .2s; text-decoration:none;
+        }
+        .btn-dl:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(212,168,67,.45); }
+        .btn-logout {
+            display:flex; align-items:center; gap:6px; padding:.6rem 1.1rem;
+            background:transparent; color:var(--text-muted); border:1px solid var(--border);
+            border-radius:8px; font-size:.82rem; cursor:pointer; transition:all .2s;
+        }
+        .btn-logout:hover { color:var(--danger); border-color:rgba(232,112,112,.35); }
+
+        /* ─── TABS ─── */
+        .dash-tabs {
+            display:flex; gap:0; padding:0 2rem;
+            background:rgba(18,3,8,.6); border-bottom:1px solid var(--border);
+        }
+        .dash-tab {
+            display:flex; align-items:center; gap:8px; padding:1rem 1.5rem;
+            font-size:.83rem; font-weight:600; cursor:pointer; border:none;
+            background:transparent; color:var(--text-muted);
+            border-bottom:2px solid transparent; transition:all .2s;
+            font-family:'Inter',sans-serif;
+        }
+        .dash-tab:hover { color:var(--gold-light); }
+        .dash-tab.active { color:var(--gold-light); border-bottom-color:var(--gold); background:rgba(212,168,67,.04); }
+        .dash-tab i { font-size:.75rem; }
+
+        .dash-body { padding:2rem; max-width:1400px; margin:0 auto; width:100%; flex:1; }
+        .tab-panel { display:none; }
+        .tab-panel.active { display:block; }
+
+        /* ─── STATS ─── */
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:2rem; }
+        .stat-card { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:1.25rem 1.5rem; transition:all .2s; }
+        .stat-card:hover { border-color:var(--border-h); transform:translateY(-3px); }
+        .stat-card .stat-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text-muted); margin-bottom:.5rem; }
+        .stat-card .stat-num { font-family:'Orbitron',sans-serif; font-size:1.9rem; font-weight:900; background:var(--gold-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+        .stat-card .stat-sub { font-size:.72rem; color:var(--text-muted); margin-top:.3rem; }
+        .stat-card.total { border-color:rgba(212,168,67,.35); background:rgba(212,168,67,.06); }
+
+        /* ─── CONTROLS ─── */
+        .controls { display:flex; gap:1rem; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; }
+        .sw { position:relative; flex:1; min-width:220px; }
+        .sw i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); }
+        .sw input { width:100%; padding:.7rem .9rem .7rem 2.5rem; background:var(--card-bg); border:1px solid var(--border); border-radius:9px; color:var(--text); font-size:.88rem; font-family:'Inter',sans-serif; outline:none; transition:all .2s; }
+        .sw input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,168,67,.1); }
+        .sw input::placeholder { color:var(--text-muted); }
+        .fsel { padding:.7rem 1rem; background:var(--card-bg); border:1px solid var(--border); border-radius:9px; color:var(--text); font-size:.88rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; transition:all .2s; min-width:170px; }
+        .fsel:focus { border-color:var(--gold); }
+        .fsel option { background:#1E0410; }
+        .ctrl-count { font-size:.8rem; color:var(--text-muted); white-space:nowrap; padding:.7rem 0; }
+
+        /* ─── TABLES (shared) ─── */
+        .table-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+        .table-scroll { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:700px; }
+        thead tr { background:rgba(107,15,42,.55); }
+        thead th { padding:.85rem 1rem; text-align:left; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--gold-light); border-bottom:1px solid var(--border); white-space:nowrap; }
+        tbody tr { border-bottom:1px solid rgba(212,168,67,.07); transition:background .15s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:rgba(212,168,67,.04); }
+        tbody td { padding:.8rem 1rem; font-size:.83rem; color:var(--text-sec); vertical-align:middle; }
+        .event-badge { display:inline-block; padding:3px 9px; background:rgba(107,15,42,.45); border:1px solid rgba(212,168,67,.2); border-radius:100px; font-size:.7rem; font-weight:700; color:var(--gold-light); white-space:nowrap; }
+        .sno-badge { display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; background:rgba(212,168,67,.1); border-radius:50%; font-size:.75rem; font-weight:700; color:var(--gold); }
+        .empty-state { display:none; flex-direction:column; align-items:center; padding:4rem 2rem; gap:1rem; text-align:center; }
+        .empty-state i { font-size:2.5rem; color:var(--text-muted); }
+        .empty-state p { color:var(--text-muted); font-size:.88rem; }
+        .btn-del {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:30px; height:30px; border-radius:8px;
+            background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25);
+            color:#F87171; font-size:.75rem; cursor:pointer;
+            transition:all .2s; outline:none;
+        }
+        .btn-del:hover { background:rgba(239,68,68,0.22); border-color:#F87171; transform:scale(1.1); }
+        .btn-del:active { transform:scale(.95); }
+        .row-deleting { opacity:0; transform:translateX(20px); transition:all .35s ease; }
+
+        /* ─── LEADERBOARD PANEL ─── */
+        .lb-layout { display:grid; grid-template-columns:340px 1fr; gap:1.5rem; align-items:start; }
+        @media(max-width:900px) { .lb-layout { grid-template-columns:1fr; } }
+
+        /* Add-score card */
+        .add-card {
+            background:var(--card-bg); border:1px solid var(--border);
+            border-radius:16px; padding:1.5rem; position:sticky; top:5rem;
+        }
+        .add-card h3 {
+            font-family:'Orbitron',sans-serif; font-size:.9rem; font-weight:700; letter-spacing:.05em;
+            background:var(--gold-grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+            margin-bottom:1.25rem; display:flex; align-items:center; gap:8px;
+        }
+        .add-card h3::before { content:''; -webkit-text-fill-color:initial; }
+        .form-field { display:flex; flex-direction:column; gap:5px; margin-bottom:.9rem; }
+        .form-field label { font-size:.72rem; font-weight:700; color:var(--gold-light); text-transform:uppercase; letter-spacing:.05em; }
+        .form-field input, .form-field select {
+            padding:.7rem .9rem; background:rgba(255,255,255,.04);
+            border:1px solid var(--border); border-radius:9px;
+            color:var(--text); font-size:.88rem; font-family:'Inter',sans-serif; outline:none; transition:all .2s;
+        }
+        .form-field input:focus, .form-field select:focus { border-color:var(--gold); background:rgba(212,168,67,.06); box-shadow:0 0 0 3px rgba(212,168,67,.1); }
+        .form-field input::placeholder { color:var(--text-muted); }
+        .form-field select option { background:#1E0410; }
+        .score-input { font-family:'Orbitron',sans-serif !important; font-size:1.1rem !important; text-align:center; font-weight:700 !important; }
+
+        .btn-add {
+            width:100%; padding:.8rem; margin-top:.25rem;
+            background:var(--gold-grad); color:var(--maroon-deep);
+            border:none; border-radius:10px; font-size:.88rem; font-weight:800;
+            font-family:'Orbitron',sans-serif; letter-spacing:.04em;
+            cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+            box-shadow:0 4px 18px rgba(212,168,67,.3);
+        }
+        .btn-add:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 7px 24px rgba(212,168,67,.45); }
+        .btn-add:disabled { opacity:.6; cursor:not-allowed; }
+
+        .add-msg { display:none; margin-top:.75rem; padding:.65rem .9rem; border-radius:8px; font-size:.82rem; align-items:center; gap:8px; }
+        .add-msg.ok  { display:flex; background:rgba(74,222,128,.1); border:1px solid rgba(74,222,128,.25); color:var(--success); }
+        .add-msg.err { display:flex; background:rgba(200,50,50,.1);  border:1px solid rgba(200,50,50,.25);  color:var(--danger); }
+
+        /* LB Table actions */
+        .btn-edit, .btn-del {
+            display:inline-flex; align-items:center; gap:5px;
+            padding:5px 10px; border-radius:7px; font-size:.75rem; font-weight:600;
+            cursor:pointer; border:none; transition:all .18s; font-family:'Inter',sans-serif;
+        }
+        .btn-edit { background:rgba(212,168,67,.12); color:var(--gold-light); border:1px solid rgba(212,168,67,.2); }
+        .btn-edit:hover { background:rgba(212,168,67,.22); }
+        .btn-del  { background:rgba(232,112,112,.1);  color:var(--danger); border:1px solid rgba(232,112,112,.2); }
+        .btn-del:hover  { background:rgba(232,112,112,.22); }
+
+        .score-val { font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; background:var(--gold-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+        /* Inline edit inputs inside table */
+        .edit-input {
+            padding:4px 8px; background:rgba(212,168,67,.08);
+            border:1px solid var(--gold); border-radius:6px;
+            color:var(--text); font-size:.82rem; font-family:'Inter',sans-serif;
+            outline:none; width:100%;
+        }
+        .edit-score {
+            font-family:'Orbitron',sans-serif; font-size:.9rem; font-weight:700;
+            text-align:center; width:80px;
+        }
+
+        /* Rank badge in lb table */
+        .rank-pill {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:28px; height:28px; border-radius:50%; font-size:.72rem; font-weight:900;
+            font-family:'Orbitron',sans-serif;
+        }
+        .rank-pill.r1 { background:linear-gradient(135deg,#FFD700,#B8860B); color:#3A2A00; }
+        .rank-pill.r2 { background:linear-gradient(135deg,#C0C0C0,#808080); color:#1A1A1A; }
+        .rank-pill.r3 { background:linear-gradient(135deg,#CD7F32,#8B4513); color:#1A0A00; }
+        .rank-pill.rn { background:rgba(212,168,67,.1); color:var(--text-muted); border:1px solid var(--border); }
+
+        /* Filter row for lb */
+        .lb-controls { display:flex; gap:.75rem; margin-bottom:1rem; flex-wrap:wrap; align-items:center; }
+        .lb-filter { padding:.6rem .9rem; background:var(--card-bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.83rem; font-family:'Inter',sans-serif; outline:none; }
+        .lb-filter:focus { border-color:var(--gold); }
+        .lb-filter option { background:#1E0410; }
+        .lb-count { font-size:.78rem; color:var(--text-muted); margin-left:auto; }
+
+        @media(max-width:768px) {
+            .dash-topbar { padding:.85rem 1rem; flex-wrap:wrap; gap:.65rem; }
+            .dash-tabs   { padding:0 1rem; overflow-x:auto; }
+            .dash-body   { padding:1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="icon"><i class="fas fa-user-shield"></i></div>
+            <h1>Admin Portal</h1>
+            <p>DATA VISTA '26 — Management Dashboard</p>
+        </div>
+        <form id="login-form" novalidate>
+            <div class="lf">
+                <label>Username</label>
+                <div class="iw"><i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Enter username" autocomplete="username">
+                </div>
+            </div>
+            <div class="lf">
+                <label>Password</label>
+                <div class="iw"><i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+                </div>
+            </div>
+            <div class="login-error" id="login-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="login-error-text">Invalid credentials.</span>
+            </div>
+            <button type="submit" class="btn-login" id="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="dashboard">
+
+    <!-- Top bar -->
+    <div class="dash-topbar">
+        <div class="dash-logo">
+            <i class="fas fa-database"></i>
+            <span>DATA VISTA '26</span>
+            <span style="color:rgba(245,236,215,.3);font-family:Inter;font-size:.82rem;font-weight:400">Admin</span>
+        </div>
+        <div class="dash-right">
+            <a href="/leaderboard" target="_blank" class="btn-dl" style="background:rgba(212,168,67,.12);color:var(--gold-light);border:1px solid var(--border)">
+                <i class="fas fa-external-link-alt"></i> Live Board
+            </a>
+            <a href="/api/admin/download" class="btn-dl" id="dl-btn">
+                <i class="fas fa-file-excel"></i> Download Excel
+            </a>
+            <button class="btn-logout" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="dash-tabs">
+        <button class="dash-tab active" id="tab-reg" onclick="switchTab('reg')">
+            <i class="fas fa-clipboard-list"></i> Registrations
+        </button>
+        <button class="dash-tab" id="tab-lb" onclick="switchTab('lb')">
+            <i class="fas fa-trophy"></i> Leaderboard
+        </button>
+    </div>
+
+    <div class="dash-body">
+
+        <!-- ══ REGISTRATIONS PANEL ══ -->
+        <div class="tab-panel active" id="panel-reg">
+
+            <!-- Stats -->
+            <div class="stats-row" id="stats-row">
+                <div class="stat-card total">
+                    <div class="stat-label">Total Registrations</div>
+                    <div class="stat-num" id="stat-total">0</div>
+                    <div class="stat-sub">All events combined</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="sw"><i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by name, college, email…">
+                </div>
+                <select class="fsel" id="event-filter">
+                    <option value="">All Events</option>
+                    <option>Pitch The Deck</option>
+                    <option>Plot Perfect</option>
+                    <option>One Piece</option>
+                    <option>Thinkathon</option>
+                    <option>Mega Auction</option>
+                </select>
+                <select class="fsel" id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="Checked In">&#10003; Checked In</option>
+                    <option value="Pending">&#9900; Pending</option>
+                </select>
+                <span class="ctrl-count" id="count-label">Loading…</span>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrap">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Reg. ID</th><th>Event</th><th>College</th><th>Department</th>
+                                <th>Participant 1</th><th>Email 1</th>
+                                <th>Participant 2</th><th>Email 2</th>
+                                <th>Phone</th><th>Additional Info</th><th>Registered On</th>
+                                <th>Check-In</th><th>Check-In Time</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                    <div class="empty-state" id="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p id="empty-text">No registrations yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /panel-reg -->
+
+        <!-- ══ LEADERBOARD PANEL ══ -->
+        <div class="tab-panel" id="panel-lb">
+            <div class="controls">
+                <div class="sw"><i class="fas fa-search"></i>
+                    <input type="text" id="lb-search-input" placeholder="Search participant, college, or Reg ID…">
+                </div>
+                <select class="fsel" id="lb-filter-event" onchange="renderLbTable()">
+                    <option value="">All Events</option>
+                    <option>Pitch The Deck</option>
+                    <option>Plot Perfect</option>
+                    <option>One Piece</option>
+                    <option>Thinkathon</option>
+                    <option>Mega Auction</option>
+                </select>
+                <button class="btn-dl" style="background:rgba(212,168,67,0.12);color:var(--gold-light);border:1px solid var(--border)" onclick="toggleManualAddModal()">
+                    <i class="fas fa-plus"></i> Add Manual Entry
+                </button>
+                <span class="ctrl-count" id="lb-count">Loading teams…</span>
+            </div>
+
+            <!-- Manual Add Modal/Card -->
+            <div id="manual-add-card" style="display:none;margin-bottom:1.2rem;padding:1.2rem;background:var(--card-bg);border:1px solid var(--border);border-radius:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+                    <h4 style="color:var(--gold-light);font-size:.9rem;font-family:'Orbitron',sans-serif"><i class="fas fa-plus-circle"></i> Add Manual Leaderboard Entry</h4>
+                    <button style="background:none;border:none;color:var(--text-muted);cursor:pointer" onclick="toggleManualAddModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem;align-items:end">
+                    <div>
+                        <label style="font-size:.72rem;color:var(--gold-light);display:block;margin-bottom:4px">Event *</label>
+                        <select class="fsel" id="m-event" style="width:100%">
+                            <option>Pitch The Deck</option>
+                            <option>Plot Perfect</option>
+                            <option>One Piece</option>
+                            <option>Thinkathon</option>
+                            <option>Mega Auction</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;color:var(--gold-light);display:block;margin-bottom:4px">College *</label>
+                        <input type="text" class="edit-input" id="m-college" placeholder="College name">
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;color:var(--gold-light);display:block;margin-bottom:4px">Team / Participants</label>
+                        <input type="text" class="edit-input" id="m-team" placeholder="Participant names">
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;color:var(--gold-light);display:block;margin-bottom:4px">Points (Score) *</label>
+                        <input type="number" class="edit-input edit-score" id="m-score" placeholder="0" min="0">
+                    </div>
+                    <div>
+                        <button class="btn-edit" id="btn-add-manual" style="padding:.65rem 1.2rem;width:100%" onclick="addManualEntry()">
+                            <i class="fas fa-check"></i> Add Entry
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Table -->
+            <div class="table-wrap">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Reg. ID</th>
+                                <th>Event</th>
+                                <th>College</th>
+                                <th>Participant(s)</th>
+                                <th>Points (Score)</th>
+                                <th>Last Updated</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lb-tbody"></tbody>
+                    </table>
+                    <div class="empty-state" id="lb-empty">
+                        <i class="fas fa-trophy"></i>
+                        <p>No enrolled registrations found.</p>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /panel-lb -->
+
+    </div><!-- /dash-body -->
+</div><!-- /dashboard -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let allRows = [], lbEntries = [], editingId = null;
+
+// ═══════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(tab) {
+    ['reg','lb'].forEach(t => {
+        document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+        document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+    });
+    if (tab === 'lb') loadLb();
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const errBox = document.getElementById('login-error');
+    const btn    = document.getElementById('login-btn');
+    errBox.classList.remove('show');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    if (!username || !password) {
+        document.getElementById('login-error-text').textContent = 'Please enter username and password.';
+        errBox.classList.add('show'); return;
+    }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying…';
+    try {
+        const res  = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) });
+        const json = await res.json();
+        if (json.success) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display    = 'flex';
+            loadData();
+        } else {
+            document.getElementById('login-error-text').textContent = json.message || 'Invalid credentials.';
+            errBox.classList.add('show');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        }
+    } catch {
+        document.getElementById('login-error-text').textContent = 'Server unreachable.';
+        errBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    }
+});
+
+// ═══════════════════════════════════════════════
+//  REGISTRATIONS
+// ═══════════════════════════════════════════════
+async function loadData() {
+    try {
+        const res  = await fetch('/api/admin/registrations');
+        if (res.status === 401) { location.reload(); return; }
+        const json = await res.json();
+        allRows = json.rows || [];
+        const counts        = json.counts        || {};
+        const checkinCounts = json.checkin_counts || {};
+        const statsRow = document.getElementById('stats-row');
+
+        // Remove old event cards (keep the total card)
+        statsRow.querySelectorAll('.stat-card:not(.total)').forEach(c => c.remove());
+
+        const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
+        const icons  = ['fa-file-alt','fa-chart-bar','fa-search','fa-brain','fa-gavel'];
+        events.forEach((ev, i) => {
+            const total   = counts[ev]   || 0;
+            const present = checkinCounts[ev] || 0;
+            const pct     = total ? Math.round((present/total)*100) : 0;
+            const div = document.createElement('div');
+            div.className = 'stat-card';
+            div.innerHTML = `
+                <div class="stat-label"><i class="fas ${icons[i]}" style="color:var(--gold);margin-right:4px"></i> ${ev}</div>
+                <div class="stat-num">${total}</div>
+                <div class="stat-sub" style="margin-bottom:.5rem">Teams registered</div>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem">
+                    <div style="flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden">
+                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#22C55E,#16A34A);border-radius:100px;transition:width .6s"></div>
+                    </div>
+                    <span style="font-size:.68rem;color:#4ADE80;white-space:nowrap;font-weight:700">${present}/${total} in</span>
+                </div>`;
+            statsRow.appendChild(div);
+        });
+
+        // Total check-in count
+        const totalPresent = Object.values(checkinCounts).reduce((a,b)=>a+b,0);
+        document.getElementById('stat-total').textContent = json.total || 0;
+        document.querySelector('.stat-card.total .stat-sub').textContent =
+            `${totalPresent} checked in so far`;
+
+        renderTable(allRows);
+    } catch { document.getElementById('count-label').textContent = 'Failed to load.'; }
+}
+
+function renderTable(rows) {
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+    const label = document.getElementById('count-label');
+    tbody.innerHTML = '';
+    if (!rows.length) {
+        empty.style.display = 'flex';
+        document.getElementById('empty-text').textContent =
+            (document.getElementById('search-input').value || document.getElementById('event-filter').value)
+            ? 'No registrations match your filter.' : 'No registrations yet.';
+        label.textContent = '0 entries'; return;
+    }
+    empty.style.display = 'none';
+    label.textContent = `${rows.length} entr${rows.length===1?'y':'ies'}`;
+    rows.forEach(row => {
+        const tr    = document.createElement('tr');
+        const regId = row[1] || '';
+        const status = row[12] || 'Pending';
+        const checkedIn = status === 'Checked In';
+        const statusBadge = checkedIn
+            ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+                   background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);
+                   border-radius:100px;font-size:.7rem;font-weight:700;color:#4ADE80;white-space:nowrap">
+                   <i class="fas fa-check-circle"></i> Checked In</span>`
+            : `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+                   background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);
+                   border-radius:100px;font-size:.7rem;font-weight:600;color:#9A7420;white-space:nowrap">
+                   <i class="fas fa-clock"></i> Pending</span>`;
+        tr.innerHTML = `
+            <td><span class="sno-badge">${row[0]??''}</span></td>
+            <td><span style="font-family:'Courier New',monospace;font-size:.75rem;color:var(--gold-light);letter-spacing:.05em">${regId}</span></td>
+            <td><span class="event-badge">${row[2]??''}</span></td>
+            <td>${row[3]??''}</td><td>${row[4]??''}</td>
+            <td style="font-weight:600;color:var(--text)">${row[5]??''}</td>
+            <td>${row[6]??''}</td>
+            <td style="font-weight:600;color:var(--text)">${row[7]??''}</td>
+            <td>${row[8]??''}</td><td>${row[9]??''}</td>
+            <td style="color:var(--gold-light)">${row[10]??'—'}</td>
+            <td style="color:var(--text-muted);white-space:nowrap">${row[11]??''}</td>
+            <td>${statusBadge}</td>
+            <td style="color:var(--text-muted);font-size:.78rem;white-space:nowrap">${row[13]??''}</td>
+            <td>
+                <button class="btn-del" title="Delete registration"
+                    data-regid="${regId}"
+                    data-name="${(row[5]||'').replace(/"/g,'&amp;quot;')}"
+                    onclick="deleteRegistration(this)">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function applyFilters() {
+    const q  = document.getElementById('search-input').value.toLowerCase();
+    const ev = document.getElementById('event-filter').value;
+    const st = document.getElementById('status-filter').value;
+    renderTable(allRows.filter(row => {
+        if (ev && row[2] !== ev) return false;
+        if (st && (row[12]||'Pending') !== st) return false;
+        if (q  && !row.join(' ').toLowerCase().includes(q)) return false;
+        return true;
+    }));
+}
+document.getElementById('search-input').addEventListener('input',  applyFilters);
+document.getElementById('event-filter').addEventListener('change', applyFilters);
+document.getElementById('status-filter').addEventListener('change', applyFilters);
+
+// ── Delete Registration ───────────────────────────────
+async function deleteRegistration(btnEl) {
+    const regId = btnEl.dataset.regid;
+    const name  = btnEl.dataset.name || regId;
+    const confirmed = confirm(
+        `Delete registration for "${name}"?\n\nReg. ID: ${regId}\n\nThis cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res  = await fetch(`/api/admin/registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+            const tr = btnEl.closest('tr');
+            tr.classList.add('row-deleting');
+            setTimeout(() => { loadData(); }, 370);
+        } else {
+            alert('Delete failed: ' + (json.error || 'Unknown error'));
+            btnEl.disabled = false;
+            btnEl.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        }
+    } catch (err) {
+        alert('Error connecting to server.');
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    }
+}
+
+// ═══════════════════════════════════════════════
+//  LEADERBOARD
+// ═══════════════════════════════════════════════
+let editingLbId = null;
+
+async function loadLb() {
+    try {
+        const res  = await fetch('/api/admin/leaderboard');
+        if (res.status === 401) { location.reload(); return; }
+        const json = await res.json();
+        lbEntries  = json.entries || [];
+        renderLbTable();
+    } catch { /* silently fail */ }
+}
+
+function renderLbTable() {
+    const filterEv = document.getElementById('lb-filter-event').value;
+    const searchQ  = (document.getElementById('lb-search-input')?.value || '').toLowerCase().trim();
+    const tbody    = document.getElementById('lb-tbody');
+    const empty    = document.getElementById('lb-empty');
+    const countEl  = document.getElementById('lb-count');
+    tbody.innerHTML = '';
+
+    // Filter by event & search query
+    let shown = lbEntries.filter(e => {
+        const matchesEv = !filterEv || e.event === filterEv;
+        const matchesQ  = !searchQ ||
+            (e.team||'').toLowerCase().includes(searchQ) ||
+            (e.college||'').toLowerCase().includes(searchQ) ||
+            (e.reg_id||'').toLowerCase().includes(searchQ);
+        return matchesEv && matchesQ;
+    });
+
+    // Group by event, assign per-event rank based on score desc
+    const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
+    const evGroups = {};
+    events.forEach(ev => { evGroups[ev] = []; });
+    shown.forEach(e => { if (evGroups[e.event]) evGroups[e.event].push(e); else evGroups[e.event] = [e]; });
+    
+    const ranked = [];
+    Object.values(evGroups).forEach(group => {
+        const sorted = [...group].sort((a,b) => (b.score || 0) - (a.score || 0));
+        sorted.forEach((e,i) => ranked.push({...e, rank: i+1}));
+    });
+    
+    // Sort display by event order, then by rank
+    ranked.sort((a,b) => {
+        const ei = events.indexOf(a.event) - events.indexOf(b.event);
+        return ei !== 0 ? ei : a.rank - b.rank;
+    });
+
+    if (!ranked.length) {
+        empty.style.display = 'flex';
+        countEl.textContent = '0 teams';
+        return;
+    }
+    empty.style.display = 'none';
+    countEl.textContent = `${ranked.length} team${ranked.length===1?'':'s'}`;
+
+    ranked.forEach(entry => {
+        const isEditing = editingLbId === entry.id;
+        const rankClass = entry.rank <= 3 ? `r${entry.rank}` : 'rn';
+        const tr = document.createElement('tr');
+        tr.id = `lb-row-${entry.id}`;
+
+        if (isEditing) {
+            tr.innerHTML = `
+                <td><span class="rank-pill ${rankClass}">${entry.rank}</span></td>
+                <td><span style="font-family:'Courier New',monospace;font-size:.75rem;color:var(--gold-light);letter-spacing:.05em">${entry.reg_id || 'GUEST'}</span></td>
+                <td>
+                    <select class="fsel" id="ei-event-${entry.id}" style="font-size:.78rem;padding:4px 6px">
+                        ${events.map(ev => `<option ${ev===entry.event?'selected':''}>${ev}</option>`).join('')}
+                    </select>
+                </td>
+                <td><input class="edit-input" id="ei-college-${entry.id}" value="${entry.college || ''}"></td>
+                <td><input class="edit-input" id="ei-team-${entry.id}" value="${entry.team || ''}"></td>
+                <td><input type="number" class="edit-input edit-score" id="ei-score-${entry.id}" value="${entry.score || 0}" min="0"></td>
+                <td style="color:var(--text-muted);font-size:.75rem;white-space:nowrap">${entry.timestamp || '—'}</td>
+                <td>
+                    <div style="display:flex;gap:4px">
+                        <button class="btn-edit" onclick="saveFullLbEdit(${entry.id}, this)" title="Save changes"><i class="fas fa-check"></i></button>
+                        <button class="btn-del" style="background:rgba(255,255,255,0.08);color:var(--text-muted)" onclick="cancelLbEdit()" title="Cancel"><i class="fas fa-times"></i></button>
+                    </div>
+                </td>`;
+        } else {
+            tr.innerHTML = `
+                <td><span class="rank-pill ${rankClass}">${entry.rank}</span></td>
+                <td><span style="font-family:'Courier New',monospace;font-size:.75rem;color:var(--gold-light);letter-spacing:.05em">${entry.reg_id || '—'}</span></td>
+                <td><span class="event-badge">${entry.event}</span></td>
+                <td style="font-weight:600;color:var(--text)">${entry.college}</td>
+                <td style="color:var(--text);font-weight:600">${entry.team || '—'}</td>
+                <td>
+                    <input type="number" class="edit-input edit-score" id="lb-score-val-${entry.id}"
+                        value="${entry.score || 0}" min="0" max="9999"
+                        onkeydown="if(event.key==='Enter') savePoints(${entry.id}, this)">
+                </td>
+                <td style="color:var(--text-muted);font-size:.75rem;white-space:nowrap">${entry.timestamp || '—'}</td>
+                <td>
+                    <div style="display:flex;gap:4px;align-items:center">
+                        <button class="btn-edit" onclick="savePoints(${entry.id}, this)" title="Quick save points">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button class="btn-edit" style="background:rgba(212,168,67,0.12);color:var(--gold-light);padding:0 8px" onclick="startLbEdit(${entry.id})" title="Edit details">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn-del" onclick="deleteLbEntry(${entry.id}, this)" title="Delete leaderboard entry">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>`;
+        }
+        tbody.appendChild(tr);
+    });
+}
+
+// ── Save Points Quick ────────────────────────────
+async function savePoints(id, btnEl) {
+    const inputEl  = document.getElementById(`lb-score-val-${id}`);
+    const scoreVal = parseInt(inputEl.value, 10);
+    if (isNaN(scoreVal) || scoreVal < 0) {
+        alert('Please enter a valid non-negative score.');
+        return;
+    }
+
+    const origHtml = btnEl.innerHTML;
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch(`/api/admin/leaderboard/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: scoreVal })
+        });
+        const json = await res.json();
+        if (json.success) {
+            const idx = lbEntries.findIndex(e => e.id === id);
+            if (idx !== -1) lbEntries[idx] = json.entry;
+            renderLbTable();
+        } else {
+            alert('Failed to save points: ' + (json.error || 'Unknown error'));
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
+    } catch {
+        alert('Server connection error.');
+        btnEl.disabled = false;
+        btnEl.innerHTML = origHtml;
+    }
+}
+
+// ── Full Edit / Delete Handlers ──────────────────
+function startLbEdit(id) { editingLbId = id; renderLbTable(); }
+function cancelLbEdit()  { editingLbId = null; renderLbTable(); }
+
+async function saveFullLbEdit(id, btnEl) {
+    const ev      = document.getElementById(`ei-event-${id}`).value;
+    const college = document.getElementById(`ei-college-${id}`).value.trim();
+    const team    = document.getElementById(`ei-team-${id}`).value.trim();
+    const score   = parseInt(document.getElementById(`ei-score-${id}`).value, 10) || 0;
+
+    if (!college) { alert('College name is required.'); return; }
+
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch(`/api/admin/leaderboard/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: ev, college, team, score })
+        });
+        const json = await res.json();
+        if (json.success) {
+            const idx = lbEntries.findIndex(e => e.id === id);
+            if (idx !== -1) lbEntries[idx] = json.entry;
+            editingLbId = null;
+            renderLbTable();
+        } else {
+            alert('Save failed: ' + (json.error || 'Unknown error'));
+            btnEl.disabled = false;
+            btnEl.innerHTML = '<i class="fas fa-check"></i>';
+        }
+    } catch {
+        alert('Server connection error.');
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="fas fa-check"></i>';
+    }
+}
+
+async function deleteLbEntry(id, btnEl) {
+    const entry = lbEntries.find(e => e.id === id);
+    const label = entry ? (entry.team || entry.college || 'this entry') : 'this entry';
+    const confirmed = confirm(`Delete leaderboard entry for "${label}"?\n\nThis will remove it from the public leaderboard.`);
+    if (!confirmed) return;
+
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch(`/api/admin/leaderboard/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+            lbEntries = lbEntries.filter(e => e.id !== id);
+            renderLbTable();
+        } else {
+            alert('Delete failed: ' + (json.error || 'Unknown error'));
+            btnEl.disabled = false;
+            btnEl.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        }
+    } catch {
+        alert('Server connection error.');
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    }
+}
+
+// ── Manual Add Modal Toggle & Submit ─────────────
+function toggleManualAddModal() {
+    const card = document.getElementById('manual-add-card');
+    if (card) card.style.display = card.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addManualEntry() {
+    const ev      = document.getElementById('m-event').value;
+    const college = document.getElementById('m-college').value.trim();
+    const team    = document.getElementById('m-team').value.trim();
+    const score   = parseInt(document.getElementById('m-score').value, 10) || 0;
+
+    if (!college) { alert('College name is required.'); return; }
+
+    const btn = document.getElementById('btn-add-manual');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding';
+
+    try {
+        const res = await fetch('/api/admin/leaderboard/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: ev, college, team, score })
+        });
+        const json = await res.json();
+        if (json.success) {
+            lbEntries.push(json.entry);
+            document.getElementById('m-college').value = '';
+            document.getElementById('m-team').value    = '';
+            document.getElementById('m-score').value   = '';
+            toggleManualAddModal();
+            renderLbTable();
+        } else {
+            alert('Failed: ' + (json.error || 'Unknown error'));
+        }
+    } catch {
+        alert('Server connection error.');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Add Entry';
+}
+
+// Bind search input listener for Leaderboard
+document.getElementById('lb-search-input')?.addEventListener('input', renderLbTable);
+
+// ═══════════════════════════════════════════════
+//  LOGOUT
+// ═══════════════════════════════════════════════
+document.getElementById('logout-btn').addEventListener('click', async function() {
+    await fetch('/api/admin/logout', { method:'POST' });
+    location.reload();
+});
+</script>
+</body>
+</html>

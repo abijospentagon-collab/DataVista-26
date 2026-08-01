@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Attendance Check-In — DATA VISTA '26</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --gold:        #D4A843;
+            --gold-light:  #F0C96A;
+            --gold-dark:   #9A7420;
+            --maroon:      #6B0F2A;
+            --maroon-dark: #3D0818;
+            --bg:          #0E0105;
+            --card:        rgba(26,3,12,0.97);
+            --border:      rgba(212,168,67,0.2);
+            --text:        #F5ECD7;
+            --muted:       rgba(245,236,215,0.5);
+            --green:       #4ADE80;
+            --green-bg:    rgba(74,222,128,0.1);
+            --green-border:rgba(74,222,128,0.3);
+            --amber:       #FCD34D;
+            --red:         #F87171;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 70px 1rem 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%,
+                rgba(107,15,42,0.6) 0%, transparent 70%), var(--bg);
+        }
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(212,168,67,0.04) 1px, transparent 1px),
+                linear-gradient(90deg,rgba(212,168,67,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .8rem 1.5rem;
+            background: rgba(14,1,5,0.9);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+        .topbar-logo {
+            font-family: 'Orbitron', sans-serif; font-size: .88rem; font-weight: 700;
+            background: linear-gradient(135deg,#F0C96A,#9A7420);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .topbar-sub { font-size:.72rem; color:var(--muted); }
+
+        /* Search card */
+        .search-card {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 480px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.8rem 1.6rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            margin-bottom: 1.2rem;
+        }
+
+        .search-title {
+            text-align: center; margin-bottom: 1.3rem;
+        }
+        .search-title h2 {
+            font-family: 'Orbitron', sans-serif; font-size: 1rem;
+            color: var(--gold-light); letter-spacing: .1em; margin-bottom: .3rem;
+        }
+        .search-title p {
+            font-size: .8rem; color: var(--muted);
+        }
+
+        .id-input-wrap {
+            display: flex; gap: .6rem; margin-bottom: .8rem;
+        }
+        .id-input {
+            flex: 1;
+            padding: .85rem 1rem;
+            background: rgba(212,168,67,0.06);
+            border: 1.5px solid rgba(212,168,67,0.25);
+            border-radius: 12px;
+            color: var(--gold-light);
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .id-input::placeholder { color: rgba(212,168,67,0.3); font-weight: 400; letter-spacing: .05em; }
+        .id-input:focus { border-color: var(--gold); background: rgba(212,168,67,0.1); }
+
+        .btn-search {
+            padding: .85rem 1.2rem;
+            background: linear-gradient(135deg,var(--maroon),var(--maroon-dark));
+            border: 1px solid rgba(212,168,67,0.3);
+            border-radius: 12px;
+            color: var(--gold-light);
+            font-size: .9rem; font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer; white-space: nowrap;
+            transition: all .2s;
+        }
+        .btn-search:hover { background: linear-gradient(135deg,#7D1232,#4A0A1E); border-color: var(--gold); }
+        .btn-search:disabled { opacity: .5; cursor: not-allowed; }
+
+        .hint { font-size: .72rem; color: var(--muted); text-align: center; }
+        .hint span { color: var(--gold-dark); }
+
+        /* Result card */
+        .result-card {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 480px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .result-card.show { display: block; animation: slideIn .3s ease; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+        .result-head {
+            padding: 1.2rem 1.4rem;
+            background: linear-gradient(135deg, rgba(107,15,42,0.5), rgba(61,8,24,0.3));
+            border-bottom: 1px solid var(--border);
+        }
+        .event-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: .65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .15em; color: var(--gold-dark);
+            background: rgba(212,168,67,0.1); border: 1px solid rgba(212,168,67,0.2);
+            padding: 3px 12px; border-radius: 100px; margin-bottom: .6rem;
+        }
+        .result-college { font-size: .95rem; font-weight: 700; color: var(--text); }
+        .result-dept    { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+        .result-regid   {
+            display: inline-block; margin-top: .6rem;
+            font-family: 'Courier New', monospace; font-size: .75rem;
+            color: var(--gold-light); letter-spacing: .1em;
+            background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.2);
+            padding: 2px 10px; border-radius: 100px;
+        }
+
+        .participants {
+            padding: 1rem 1.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .p-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; color: var(--gold-dark); margin-bottom: .65rem; }
+        .p-row { display: flex; align-items: center; gap: .65rem; padding: .45rem 0; border-bottom: 1px solid rgba(212,168,67,0.06); }
+        .p-row:last-child { border-bottom: none; }
+        .p-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,var(--maroon),var(--maroon-dark)); border: 1.5px solid rgba(212,168,67,0.25); display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; color: var(--gold-light); flex-shrink: 0; }
+        .p-name { font-size: .88rem; font-weight: 600; }
+        .p-sub  { font-size: .68rem; color: var(--muted); }
+
+        /* Already checked in banner */
+        .already-bar {
+            display: none;
+            margin: .8rem 1.4rem 0;
+            padding: .65rem 1rem;
+            background: rgba(252,211,77,0.08); border: 1px solid rgba(252,211,77,0.25);
+            border-radius: 8px; font-size: .8rem; color: var(--amber); text-align: center;
+        }
+
+        .action-area { padding: 1rem 1.4rem 1.3rem; }
+        .btn-mark {
+            width: 100%; padding: .95rem;
+            background: linear-gradient(135deg,#22C55E,#16A34A);
+            color: #fff; border: none; border-radius: 12px;
+            font-size: 1rem; font-weight: 700; font-family: 'Inter', sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: transform .15s, box-shadow .15s;
+            box-shadow: 0 6px 20px rgba(34,197,94,0.3);
+        }
+        .btn-mark:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(34,197,94,0.45); }
+        .btn-mark:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+        .btn-mark.already { background: linear-gradient(135deg,#6B7280,#4B5563); box-shadow: none; }
+
+        /* Success overlay */
+        .success-overlay {
+            display: none;
+            position: relative; z-index: 1;
+            width: 100%; max-width: 480px;
+            background: var(--card);
+            border: 1px solid var(--green-border);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .success-overlay.show { display: block; animation: slideIn .35s ease; }
+        .check-ring {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg,#22C55E,#16A34A);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem; font-size: 2rem; color: #fff;
+            animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 0 36px rgba(34,197,94,0.4);
+        }
+        @keyframes popIn { from{transform:scale(.3);opacity:0} to{transform:scale(1);opacity:1} }
+        .success-overlay h2 { font-family:'Orbitron',sans-serif; font-size:1.2rem; color:var(--green); margin-bottom:.4rem; }
+        .success-name  { font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:.2rem; }
+        .success-event { font-size:.82rem; color:var(--muted); margin-bottom:1rem; }
+        .success-time  { display:inline-block; background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:.5rem 1rem; font-size:.8rem; color:var(--green); }
+        .btn-next {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-top: 1.2rem; padding: .65rem 1.5rem;
+            border: 1px solid rgba(212,168,67,0.25); border-radius: 100px;
+            color: var(--gold-light); font-size: .85rem; font-weight: 600;
+            background: transparent; cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all .2s;
+        }
+        .btn-next:hover { background: rgba(212,168,67,0.08); border-color: var(--gold); }
+
+        /* Error */
+        .error-msg {
+            display: none;
+            width: 100%; max-width: 480px;
+            position: relative; z-index: 1;
+            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25);
+            border-radius: 12px; padding: 1rem 1.2rem;
+            text-align: center; font-size: .85rem; color: var(--red);
+        }
+        .error-msg.show { display: block; animation: slideIn .25s ease; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <span class="topbar-logo"><i class="fas fa-clipboard-check" style="margin-right:8px;font-size:.8rem"></i>DATA VISTA '26</span>
+    <span class="topbar-sub">Attendance Check-In</span>
+</div>
+
+<!-- Search card -->
+<div class="search-card">
+    <div class="search-title">
+        <h2><i class="fas fa-id-badge" style="margin-right:8px;font-size:.85rem"></i>Check-In Portal</h2>
+        <p>Enter the participant's Registration ID to mark attendance</p>
+    </div>
+
+    <div class="id-input-wrap">
+        <input
+            type="text"
+            class="id-input"
+            id="reg-id-input"
+            placeholder="e.g. DV26-PTD-K3X8F"
+            maxlength="15"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            onkeydown="if(event.key==='Enter') lookupId()"
+        >
+        <button class="btn-search" id="btn-search" onclick="lookupId()">
+            <i class="fas fa-search"></i> Find
+        </button>
+    </div>
+    <p class="hint">Format: <span>DV26-XXX-XXXXX</span> &nbsp;|&nbsp; Type and press Find or Enter</p>
+</div>
+
+<!-- Error message -->
+<div class="error-msg" id="error-msg">
+    <i class="fas fa-exclamation-circle" style="margin-right:6px"></i>
+    <span id="error-text">Registration not found.</span>
+</div>
+
+<!-- Result card -->
+<div class="result-card" id="result-card">
+    <div class="result-head">
+        <div class="event-badge"><i class="fas fa-calendar-check"></i><span id="r-event">—</span></div>
+        <div class="result-college" id="r-college">—</div>
+        <div class="result-dept"    id="r-dept">—</div>
+        <div class="result-regid"   id="r-regid">—</div>
+    </div>
+
+    <div class="participants">
+        <div class="p-label"><i class="fas fa-users"></i>&nbsp; Participants</div>
+        <div class="p-row">
+            <div class="p-avatar">P1</div>
+            <div><div class="p-name" id="r-p1">—</div><div class="p-sub">Participant 1</div></div>
+        </div>
+        <div class="p-row">
+            <div class="p-avatar">P2</div>
+            <div><div class="p-name" id="r-p2">—</div><div class="p-sub">Participant 2</div></div>
+        </div>
+    </div>
+
+    <div class="already-bar" id="already-bar">
+        <i class="fas fa-exclamation-triangle"></i>
+        Already checked in at <strong id="already-time">—</strong>
+    </div>
+
+    <div class="action-area">
+        <button class="btn-mark" id="btn-mark" onclick="markPresent()">
+            <i class="fas fa-check-circle"></i> Mark as Present
+        </button>
+    </div>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="success-overlay">
+    <div class="check-ring"><i class="fas fa-check"></i></div>
+    <h2>Checked In!</h2>
+    <div class="success-name"  id="s-name">—</div>
+    <div class="success-event" id="s-event">—</div>
+    <div class="success-time"><i class="fas fa-clock" style="margin-right:5px"></i>Marked present at <strong id="s-time">—</strong></div>
+    <br>
+    <button class="btn-next" onclick="resetForNext()">
+        <i class="fas fa-arrow-left"></i> Check In Next
+    </button>
+</div>
+
+<script>
+let currentData = null;
+
+function lookupId() {
+    const rawInput = document.getElementById('reg-id-input').value.trim().toUpperCase();
+    if (!rawInput) return;
+
+    // Hide previous results
+    document.getElementById('result-card').classList.remove('show');
+    document.getElementById('success-overlay').classList.remove('show');
+    document.getElementById('error-msg').classList.remove('show');
+
+    const btn = document.getElementById('btn-search');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch(`/api/checkin/${encodeURIComponent(rawInput)}`)
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search"></i> Find';
+
+            if (!data.found) {
+                document.getElementById('error-text').textContent =
+                    data.error || 'Registration ID not found. Please check and try again.';
+                document.getElementById('error-msg').classList.add('show');
+                return;
+            }
+
+            currentData = data;
+
+            // Populate result card
+            document.getElementById('r-event').textContent   = data.event;
+            document.getElementById('r-college').textContent = data.college;
+            document.getElementById('r-dept').textContent    = data.department;
+            document.getElementById('r-regid').textContent   = data.reg_id;
+            document.getElementById('r-p1').textContent      = data.p1name || '—';
+            document.getElementById('r-p2').textContent      = data.p2name || '—';
+
+            const alreadyBar = document.getElementById('already-bar');
+            const markBtn    = document.getElementById('btn-mark');
+
+            if (data.status === 'Checked In') {
+                alreadyBar.style.display = 'block';
+                document.getElementById('already-time').textContent = data.checkin_at;
+                markBtn.disabled = true;
+                markBtn.classList.add('already');
+                markBtn.innerHTML = '<i class="fas fa-check-double"></i> Already Checked In';
+            } else {
+                alreadyBar.style.display = 'none';
+                markBtn.disabled = false;
+                markBtn.classList.remove('already');
+                markBtn.innerHTML = '<i class="fas fa-check-circle"></i> Mark as Present';
+            }
+
+            document.getElementById('result-card').classList.add('show');
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search"></i> Find';
+            document.getElementById('error-text').textContent = 'Cannot connect to server. Check WiFi connection.';
+            document.getElementById('error-msg').classList.add('show');
+        });
+}
+
+function markPresent() {
+    if (!currentData) return;
+    const btn = document.getElementById('btn-mark');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Marking…';
+
+    fetch(`/api/checkin/${encodeURIComponent(currentData.reg_id)}/mark`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('result-card').classList.remove('show');
+                document.getElementById('s-name').textContent  = `${currentData.p1name}  &  ${currentData.p2name}`;
+                document.getElementById('s-event').textContent = `${currentData.event} — ${currentData.college}`;
+                document.getElementById('s-time').textContent  = data.checked_in_at;
+                document.getElementById('success-overlay').classList.add('show');
+            } else if (data.already) {
+                document.getElementById('already-bar').style.display = 'block';
+                document.getElementById('already-time').textContent = data.checked_in_at;
+                btn.classList.add('already');
+                btn.innerHTML = '<i class="fas fa-check-double"></i> Already Checked In';
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Mark as Present';
+            }
+        })
+        .catch(() => {
+            alert('Cannot connect to server.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Mark as Present';
+        });
+}
+
+function resetForNext() {
+    currentData = null;
+    document.getElementById('reg-id-input').value = '';
+    document.getElementById('result-card').classList.remove('show');
+    document.getElementById('success-overlay').classList.remove('show');
+    document.getElementById('error-msg').classList.remove('show');
+    document.getElementById('reg-id-input').focus();
+}
+
+// Auto-format as user types: DV26-XXX-XXXXX
+document.getElementById('reg-id-input').addEventListener('input', function() {
+    let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.length > 4)  v = v.slice(0,4)  + '-' + v.slice(4);
+    if (v.length > 8)  v = v.slice(0,8)  + '-' + v.slice(8);
+    if (v.length > 14) v = v.slice(0,14);
+    this.value = v;
+});
+
+// Focus the input on load
+window.onload = () => document.getElementById('reg-id-input').focus();
+</script>
+</body>
+</html>

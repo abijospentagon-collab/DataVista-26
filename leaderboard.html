@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard — DATA VISTA '26</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --gold:       #D4A843;
+            --gold-light: #F0C96A;
+            --gold-dark:  #9A7420;
+            --maroon:     #6B0F2A;
+            --maroon-dk:  #3D0818;
+            --bg:         #0E0206;
+            --card:       rgba(25,4,14,0.88);
+            --border:     rgba(212,168,67,0.18);
+            --text:       #F5ECD7;
+            --muted:      rgba(245,236,215,0.45);
+            --grad:       linear-gradient(135deg,#F0C96A,#9A7420);
+            --r1:         linear-gradient(135deg,#FFD700,#B8860B); /* gold */
+            --r2:         linear-gradient(135deg,#C0C0C0,#808080); /* silver */
+            --r3:         linear-gradient(135deg,#CD7F32,#8B4513); /* bronze */
+        }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+        /* Background */
+        .bg-radial {
+            position:fixed; inset:0; z-index:0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(107,15,42,.55) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 40% at 85% 90%, rgba(61,8,24,.4) 0%, transparent 55%),
+                var(--bg);
+        }
+        .grid { position:fixed; inset:0; z-index:0;
+            background-image:linear-gradient(rgba(212,168,67,.04) 1px,transparent 1px),
+                             linear-gradient(90deg,rgba(212,168,67,.04) 1px,transparent 1px);
+            background-size:50px 50px; }
+
+        /* Particles */
+        .particles { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+        .particle {
+            position:absolute; width:2px; height:2px; border-radius:50%;
+            background:var(--gold); opacity:0;
+            animation:particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0%   { transform:translateY(100vh) scale(0); opacity:0; }
+            10%  { opacity:.6; }
+            90%  { opacity:.3; }
+            100% { transform:translateY(-10vh) scale(1); opacity:0; }
+        }
+
+        /* Top bar */
+        .topbar {
+            position:sticky; top:0; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:.9rem 2.5rem;
+            background:rgba(14,2,6,.85); border-bottom:1px solid var(--border);
+            backdrop-filter:blur(14px);
+        }
+        .logo {
+            font-family:'Orbitron',sans-serif; font-size:.95rem; font-weight:900;
+            background:var(--grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+            text-decoration:none; display:flex; align-items:center; gap:9px;
+        }
+        .topbar-right { display:flex; align-items:center; gap:1rem; }
+        .live-badge {
+            display:flex; align-items:center; gap:7px;
+            padding:5px 14px; border-radius:100px;
+            background:rgba(212,168,67,.1); border:1px solid rgba(212,168,67,.3);
+            font-size:.73rem; font-weight:700; letter-spacing:.08em;
+            color:var(--gold-light);
+        }
+        .live-dot {
+            width:8px; height:8px; border-radius:50%;
+            background:#4ADE80;
+            animation:livePulse 1.4s ease-in-out infinite;
+        }
+        .live-dot.stale { background:#E87070; animation:none; }
+        @keyframes livePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.6} }
+        .btn-back {
+            display:flex; align-items:center; gap:7px;
+            color:var(--muted); font-size:.83rem; text-decoration:none; transition:color .2s;
+        }
+        .btn-back:hover { color:var(--gold-light); }
+
+        /* Hero */
+        .hero {
+            position:relative; z-index:1;
+            text-align:center; padding:3.5rem 1.5rem 2rem;
+        }
+        .hero h1 {
+            font-family:'Orbitron',sans-serif;
+            font-size:clamp(1.8rem,5vw,3rem); font-weight:900; letter-spacing:.06em;
+            background:var(--grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+            margin-bottom:.6rem;
+        }
+        .hero p { color:var(--muted); font-size:.92rem; margin-bottom:.5rem; }
+        .last-updated { font-size:.75rem; color:var(--muted); margin-top:.3rem; }
+        .last-updated span { color:var(--gold); }
+
+        /* Event tabs */
+        .tabs-wrap {
+            position:relative; z-index:1;
+            display:flex; justify-content:center;
+            padding:0 1rem 1.75rem; flex-wrap:wrap; gap:.6rem;
+        }
+        .tab {
+            display:flex; align-items:center; gap:7px;
+            padding:.55rem 1.2rem; border-radius:100px;
+            border:1px solid var(--border);
+            background:transparent; color:var(--muted);
+            font-size:.8rem; font-weight:600; cursor:pointer;
+            transition:all .22s; font-family:'Inter',sans-serif;
+        }
+        .tab i { font-size:.7rem; }
+        .tab:hover { border-color:rgba(212,168,67,.4); color:var(--gold-light); background:rgba(212,168,67,.06); }
+        .tab.active {
+            background:rgba(212,168,67,.12); border-color:var(--gold);
+            color:var(--gold-light);
+            box-shadow:0 0 16px rgba(212,168,67,.18);
+        }
+
+        /* Content area */
+        .content { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:0 1.25rem 5rem; }
+
+        /* Empty state */
+        .empty {
+            text-align:center; padding:5rem 2rem;
+            display:none; flex-direction:column; align-items:center; gap:1rem;
+        }
+        .empty.show { display:flex; }
+        .empty-icon { font-size:3rem; color:var(--muted); }
+        .empty h3 { font-family:'Orbitron',sans-serif; font-size:1.1rem; color:var(--muted); }
+        .empty p { font-size:.85rem; color:var(--muted); line-height:1.6; }
+
+        /* Event group */
+        .event-group { margin-bottom:3rem; animation:fadeUp .4s ease both; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .event-group-header {
+            display:flex; align-items:center; gap:12px;
+            margin-bottom:1.25rem; padding-bottom:.85rem;
+            border-bottom:1px solid var(--border);
+        }
+        .event-group-icon {
+            width:40px; height:40px; border-radius:10px;
+            background:rgba(212,168,67,.1); border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center;
+            font-size:.95rem; color:var(--gold);
+        }
+        .event-group-name {
+            font-family:'Orbitron',sans-serif; font-size:1.05rem; font-weight:700;
+            background:var(--grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .entry-count {
+            margin-left:auto; font-size:.72rem; font-weight:700;
+            color:var(--muted); background:rgba(255,255,255,.04);
+            border:1px solid var(--border); border-radius:100px; padding:3px 10px;
+        }
+
+        /* Podium — top 3 */
+        .podium { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1rem; }
+        @media(max-width:600px) { .podium { grid-template-columns:1fr; } }
+        .podium-card {
+            border-radius:16px; padding:1.5rem 1.25rem;
+            text-align:center; position:relative; overflow:hidden;
+            border:1px solid; transition:transform .22s, box-shadow .22s;
+            background:var(--card); backdrop-filter:blur(14px);
+        }
+        .podium-card:hover { transform:translateY(-4px); }
+        .podium-card.rank-1 { border-color:rgba(255,215,0,.4); box-shadow:0 0 30px rgba(255,215,0,.15); order:-1; }
+        .podium-card.rank-2 { border-color:rgba(192,192,192,.3); box-shadow:0 0 20px rgba(192,192,192,.08); }
+        .podium-card.rank-3 { border-color:rgba(205,127,50,.3); box-shadow:0 0 20px rgba(205,127,50,.08); }
+        .podium-card .shine {
+            position:absolute; top:-60px; left:-60px; width:160px; height:160px;
+            border-radius:50%; opacity:.06;
+        }
+        .rank-1 .shine { background:radial-gradient(#FFD700,transparent); }
+        .rank-2 .shine { background:radial-gradient(#C0C0C0,transparent); }
+        .rank-3 .shine { background:radial-gradient(#CD7F32,transparent); }
+
+        .rank-badge {
+            width:52px; height:52px; border-radius:50%; margin:0 auto .85rem;
+            display:flex; align-items:center; justify-content:center;
+            font-family:'Orbitron',sans-serif; font-size:1.1rem; font-weight:900;
+        }
+        .rank-1 .rank-badge { background:var(--r1); color:#4A3300; box-shadow:0 4px 16px rgba(255,215,0,.4); }
+        .rank-2 .rank-badge { background:var(--r2); color:#2A2A2A; box-shadow:0 4px 12px rgba(192,192,192,.3); }
+        .rank-3 .rank-badge { background:var(--r3); color:#2A1000; box-shadow:0 4px 12px rgba(205,127,50,.3); }
+
+        .podium-trophy { font-size:1.6rem; margin-bottom:.4rem; }
+        .podium-college {
+            font-size:.9rem; font-weight:700; color:var(--text);
+            line-height:1.3; margin-bottom:.3rem;
+        }
+        .podium-team { font-size:.75rem; color:var(--muted); margin-bottom:.75rem; }
+        .podium-score {
+            font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900;
+            line-height:1;
+        }
+        .rank-1 .podium-score { background:var(--r1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .rank-2 .podium-score { background:var(--r2); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .rank-3 .podium-score { background:var(--r3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .score-label { font-size:.67rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:2px; }
+
+        /* Remaining ranks list */
+        .rank-list { display:flex; flex-direction:column; gap:.55rem; }
+        .rank-row {
+            display:flex; align-items:center; gap:1rem;
+            background:var(--card); border:1px solid var(--border);
+            border-radius:12px; padding:.85rem 1.25rem;
+            transition:all .2s; backdrop-filter:blur(10px);
+        }
+        .rank-row:hover { border-color:rgba(212,168,67,.3); background:rgba(212,168,67,.04); }
+        .rank-num {
+            min-width:32px; height:32px; border-radius:50%;
+            background:rgba(212,168,67,.1); border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center;
+            font-size:.78rem; font-weight:700; color:var(--muted);
+            font-family:'Orbitron',sans-serif;
+        }
+        .rank-info { flex:1; }
+        .rank-college { font-size:.88rem; font-weight:600; color:var(--text); }
+        .rank-team { font-size:.74rem; color:var(--muted); margin-top:1px; }
+        .rank-score-val {
+            font-family:'Orbitron',sans-serif; font-size:1.15rem; font-weight:900;
+            background:var(--grad); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .rank-score-lbl { font-size:.65rem; color:var(--muted); text-align:right; }
+
+        /* Refresh bar */
+        .refresh-bar {
+            position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%);
+            z-index:50; display:flex; align-items:center; gap:10px;
+            padding:.6rem 1.4rem; background:rgba(25,4,14,.9);
+            border:1px solid var(--border); border-radius:100px;
+            backdrop-filter:blur(14px); font-size:.78rem; color:var(--muted);
+        }
+        .refresh-bar i { color:var(--gold); }
+        .progress-ring { width:18px; height:18px; }
+        .progress-ring circle {
+            fill:none; stroke:var(--gold); stroke-width:2.5;
+            stroke-dasharray:50; stroke-dashoffset:50;
+            stroke-linecap:round;
+            transition:stroke-dashoffset 1s linear;
+            transform:rotate(-90deg); transform-origin:50% 50%;
+        }
+
+        @media(max-width:600px) {
+            .topbar { padding:.8rem 1rem; }
+            .hero { padding:2.5rem 1rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="bg-radial"></div>
+<div class="grid"></div>
+<div class="particles" id="particles"></div>
+
+<!-- ── Top bar ── -->
+<header class="topbar">
+    <a href="/" class="logo"><i class="fas fa-database"></i> DATA VISTA '26</a>
+    <div class="topbar-right">
+        <div class="live-badge" id="live-badge">
+            <div class="live-dot" id="live-dot"></div>
+            <span id="live-text">LIVE</span>
+        </div>
+        <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+</header>
+
+<!-- ── Hero ── -->
+<div class="hero">
+    <h1><i class="fas fa-trophy" style="font-size:.8em;margin-right:.2em"></i> Leaderboard</h1>
+    <p>Live event scores — updated in real time by the organizers</p>
+    <div class="last-updated" id="last-updated-bar">Last updated: <span id="last-updated-val">—</span></div>
+</div>
+
+<!-- ── Event tabs ── -->
+<div class="tabs-wrap" id="tabs-wrap">
+    <button class="tab active" data-event="all" onclick="setTab('all')">
+        <i class="fas fa-th"></i> All Events
+    </button>
+    <button class="tab" data-event="Pitch The Deck" onclick="setTab('Pitch The Deck')">
+        <i class="fas fa-file-alt"></i> Pitch The Deck
+    </button>
+    <button class="tab" data-event="Plot Perfect" onclick="setTab('Plot Perfect')">
+        <i class="fas fa-chart-bar"></i> Plot Perfect
+    </button>
+    <button class="tab" data-event="One Piece" onclick="setTab('One Piece')">
+        <i class="fas fa-search"></i> One Piece
+    </button>
+    <button class="tab" data-event="Thinkathon" onclick="setTab('Thinkathon')">
+        <i class="fas fa-brain"></i> Thinkathon
+    </button>
+    <button class="tab" data-event="Mega Auction" onclick="setTab('Mega Auction')">
+        <i class="fas fa-gavel"></i> Mega Auction
+    </button>
+</div>
+
+<!-- ── Content ── -->
+<div class="content">
+    <div class="empty" id="empty-state">
+        <div class="empty-icon"><i class="fas fa-hourglass-start"></i></div>
+        <h3>Scores Coming Soon</h3>
+        <p>The leaderboard will go live once the events begin.<br>Check back on 31st August 2026!</p>
+    </div>
+    <div id="lb-content"></div>
+</div>
+
+<!-- ── Refresh countdown bar ── -->
+<div class="refresh-bar">
+    <svg class="progress-ring"><circle id="ring-circle" cx="9" cy="9" r="7.5"/></svg>
+    <i class="fas fa-sync-alt"></i>
+    Auto-refreshing in <span id="countdown">30</span>s
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────
+const REFRESH_SECS = 30;
+const EVENT_ICONS  = {
+    'Pitch The Deck' : 'fas fa-file-alt',
+    'Plot Perfect'   : 'fas fa-chart-bar',
+    'One Piece'      : 'fas fa-search',
+    'Thinkathon'     : 'fas fa-brain',
+    'Mega Auction'   : 'fas fa-gavel'
+};
+const RANK_TROPHY  = { 1:'🥇', 2:'🥈', 3:'🥉' };
+
+let allData    = [];
+let activeTab  = 'all';
+let countdown  = REFRESH_SECS;
+let timerID, refreshID;
+
+// ── Particles ─────────────────────────────────────────
+const pWrap = document.getElementById('particles');
+for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+        left:${Math.random()*100}%;
+        width:${Math.random()*2.5+1}px;
+        height:${Math.random()*2.5+1}px;
+        animation-duration:${Math.random()*18+10}s;
+        animation-delay:${Math.random()*12}s;
+        opacity:${Math.random()*.5+.1};
+    `;
+    pWrap.appendChild(p);
+}
+
+// ── Tab ───────────────────────────────────────────────
+function setTab(ev) {
+    activeTab = ev;
+    document.querySelectorAll('.tab').forEach(t =>
+        t.classList.toggle('active', t.dataset.event === ev));
+    render(allData);
+}
+
+// ── Fetch ─────────────────────────────────────────────
+async function fetchData() {
+    try {
+        const res  = await fetch('/api/leaderboard');
+        const json = await res.json();
+        allData = json.entries || [];
+
+        const dot  = document.getElementById('live-dot');
+        const txt  = document.getElementById('live-text');
+        dot.classList.remove('stale');
+        txt.textContent = allData.length ? 'LIVE' : 'AWAITING';
+
+        const lu = document.getElementById('last-updated-val');
+        lu.textContent = json.last_updated || '—';
+
+        render(allData);
+    } catch {
+        const dot = document.getElementById('live-dot');
+        dot.classList.add('stale');
+        document.getElementById('live-text').textContent = 'OFFLINE';
+    }
+}
+
+// ── Render ────────────────────────────────────────────
+function render(entries) {
+    const content = document.getElementById('lb-content');
+    const empty   = document.getElementById('empty-state');
+    content.innerHTML = '';
+
+    // Filter by tab
+    const filtered = activeTab === 'all'
+        ? entries
+        : entries.filter(e => e.event === activeTab);
+
+    if (!filtered.length) {
+        empty.classList.add('show'); return;
+    }
+    empty.classList.remove('show');
+
+    // Group by event
+    const groups = {};
+    const order  = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
+    filtered.forEach(e => {
+        if (!groups[e.event]) groups[e.event] = [];
+        groups[e.event].push(e);
+    });
+
+    // Sort each group by score desc
+    const evOrder = activeTab === 'all' ? order : [activeTab];
+    evOrder.forEach(evName => {
+        if (!groups[evName]) return;
+        const sorted = [...groups[evName]].sort((a,b) => b.score - a.score);
+        content.appendChild(buildGroup(evName, sorted));
+    });
+}
+
+function buildGroup(evName, sorted) {
+    const div = document.createElement('div');
+    div.className = 'event-group';
+
+    // Header
+    div.innerHTML = `
+        <div class="event-group-header">
+            <div class="event-group-icon"><i class="${EVENT_ICONS[evName]||'fas fa-star'}"></i></div>
+            <div class="event-group-name">${evName}</div>
+            <div class="entry-count">${sorted.length} team${sorted.length!==1?'s':''}</div>
+        </div>`;
+
+    // Podium (top 3)
+    const top3 = sorted.slice(0, 3);
+    if (top3.length) {
+        const podium = document.createElement('div');
+        podium.className = 'podium';
+        top3.forEach((entry, i) => {
+            const rank = i + 1;
+            const card = document.createElement('div');
+            card.className = `podium-card rank-${rank}`;
+            card.style.animationDelay = `${i * 0.1}s`;
+            card.innerHTML = `
+                <div class="shine"></div>
+                <div class="rank-badge">${rank}</div>
+                <div class="podium-trophy">${RANK_TROPHY[rank]}</div>
+                <div class="podium-college">${entry.college}</div>
+                <div class="podium-team">${entry.team || '—'}${entry.reg_id ? `<br><span style="font-family:'Courier New',monospace;font-size:.7rem;color:var(--gold-light);letter-spacing:.05em">${entry.reg_id}</span>` : ''}</div>
+                <div class="podium-score">${entry.score}</div>
+                <div class="score-label">points</div>`;
+            podium.appendChild(card);
+        });
+        div.appendChild(podium);
+    }
+
+    // Remaining (4th onwards)
+    const rest = sorted.slice(3);
+    if (rest.length) {
+        const list = document.createElement('div');
+        list.className = 'rank-list';
+        rest.forEach((entry, i) => {
+            const row = document.createElement('div');
+            row.className = 'rank-row';
+            row.innerHTML = `
+                <div class="rank-num">${i + 4}</div>
+                <div class="rank-info">
+                    <div class="rank-college">${entry.college}</div>
+                    <div class="rank-team">${entry.team || '—'}${entry.reg_id ? ` &bull; <span style="font-family:'Courier New',monospace;font-size:.7rem;color:var(--gold-light);letter-spacing:.05em">${entry.reg_id}</span>` : ''}</div>
+                </div>
+                <div>
+                    <div class="rank-score-val">${entry.score}</div>
+                    <div class="rank-score-lbl">pts</div>
+                </div>`;
+            list.appendChild(row);
+        });
+        div.appendChild(list);
+    }
+
+    return div;
+}
+
+// ── Countdown & auto-refresh ──────────────────────────
+const circle = document.getElementById('ring-circle');
+const circum = 2 * Math.PI * 7.5; // ≈ 47.12
+
+function startCountdown() {
+    countdown = REFRESH_SECS;
+    clearInterval(timerID);
+    timerID = setInterval(() => {
+        countdown--;
+        document.getElementById('countdown').textContent = countdown;
+        // Ring progress
+        const offset = circum * (1 - countdown / REFRESH_SECS);
+        circle.style.strokeDashoffset = circum - offset;
+        if (countdown <= 0) {
+            clearInterval(timerID);
+            fetchData().then(startCountdown);
+        }
+    }, 1000);
+}
+
+// ── Init ──────────────────────────────────────────────
+fetchData().then(startCountdown);
+</script>
+</body>
+</html>

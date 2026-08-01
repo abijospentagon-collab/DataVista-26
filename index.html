@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATA VISTA '26 - Intercollegiate Tech Fest | Madras Christian College</title>
+    <meta name="description" content="DATA VISTA '26 — The Intercollegiate Tech Fest by the Department of Data Science, Madras Christian College. Date: 31st August 2026, Anderson Hall.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Auto-redirect: if opened as a file, send to Flask server -->
+    <script>
+        (function() {
+            if (window.location.protocol === 'file:') {
+                window.location.replace('http://localhost:5000');
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- Animated Background Particles -->
+    <div class="background-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="20,2 37,11 37,29 20,38 3,29 3,11" fill="none" stroke="url(#hexG)" stroke-width="2"/>
+                        <circle cx="20" cy="20" r="5" fill="url(#hexG)"/>
+                        <line x1="20" y1="2"  x2="20" y2="15" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <line x1="20" y1="25" x2="20" y2="38" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <line x1="3"  y1="11" x2="15" y2="17" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <line x1="25" y1="23" x2="37" y2="29" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <line x1="37" y1="11" x2="25" y2="17" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <line x1="15" y1="23" x2="3"  y2="29" stroke="url(#hexG)" stroke-width="1.5"/>
+                        <defs>
+                            <linearGradient id="hexG" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F0C96A"/>
+                                <stop offset="100%" style="stop-color:#9A7420"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span>DATA VISTA '26</span>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#home"      class="nav-link">Home</a>
+                <a href="#schedule"  class="nav-link">Schedule</a>
+                <a href="#events"    class="nav-link">Events</a>
+                <a href="#contact"   class="nav-link">Contact</a>
+                <a href="/leaderboard" class="nav-link nav-leaderboard">
+                    <i class="fas fa-trophy"></i> Leaderboard
+                </a>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="#home"      class="nav-link">Home</a>
+            <a href="#schedule"  class="nav-link">Schedule</a>
+            <a href="#events"    class="nav-link">Events</a>
+            <a href="#contact"   class="nav-link">Contact</a>
+            <a href="/leaderboard" class="nav-link nav-leaderboard">
+                <i class="fas fa-trophy"></i> Leaderboard
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ═══ HERO ═══ -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-university"></i>
+                    <span>Madras Christian College (Autonomous)</span>
+                </div>
+                <p class="hero-dept">DEPARTMENT OF DATA SCIENCE PRESENTS</p>
+                <h1 class="hero-title">
+                    <span class="gradient-text" id="main-title">DATA VISTA</span>
+                    <span class="hero-year">'26</span>
+                </h1>
+                <div class="hero-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>31<sup>st</sup> August 2026</span>
+                    </div>
+                    <div class="meta-divider"></div>
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Anderson Hall</span>
+                    </div>
+                    <div class="meta-divider"></div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>9:00 AM</span>
+                    </div>
+                </div>
+                <p class="hero-subtitle">
+                    The premier intercollegiate tech fest by the Department of Data Science.
+                    Open to students of MCA, M.Sc. CS, Data Science, Statistics, Mathematics & AI.
+                    Compete. Innovate. Excel.
+                </p>
+                <div class="hero-actions">
+                    <a href="DATA VISTA 26.pdf" download class="download-button">
+                        <i class="fas fa-download"></i>
+                        Download Rule Book
+                    </a>
+                    <a href="#events" class="cta-button">
+                        <span>Explore Events</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="/leaderboard" class="leaderboard-btn">
+                        <i class="fas fa-trophy"></i>
+                        <span>Leaderboard</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="emblem-wrapper">
+                    <div class="emblem-glow-ring ring-outer"></div>
+                    <div class="emblem-glow-ring ring-inner"></div>
+                    <div class="emblem-pulse"></div>
+                    <div class="emblem-pulse delay"></div>
+                    <img src="emblem.jpg" alt="DATA VISTA '26 Emblem" class="hero-emblem">
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ COUNTDOWN ═══ -->
+        <section class="countdown-section">
+            <div class="countdown-container">
+                <h3 class="countdown-title">
+                    <i class="fas fa-hourglass-half"></i>
+                    Event Countdown
+                </h3>
+                <div class="countdown-timer">
+                    <div class="countdown-item">
+                        <div class="countdown-box"><span class="countdown-number" id="days">00</span></div>
+                        <span class="countdown-label">Days</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-box"><span class="countdown-number" id="hours">00</span></div>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-box"><span class="countdown-number" id="minutes">00</span></div>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-box"><span class="countdown-number" id="seconds">00</span></div>
+                        <span class="countdown-label">Seconds</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ PROGRAMME SCHEDULE ═══ -->
+        <section id="schedule" class="schedule">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title"><span class="gradient-text">Programme Schedule</span></h2>
+                    <p class="section-subtitle">Full day agenda for DATA VISTA '26</p>
+                </div>
+                <div class="schedule-grid">
+                    <div class="schedule-card inauguration">
+                        <div class="schedule-time">
+                            <i class="fas fa-flag"></i>
+                            <span>9:00 AM – 10:00 AM</span>
+                        </div>
+                        <div class="schedule-info">
+                            <h3>Inauguration</h3>
+                            <p>Anderson Hall</p>
+                        </div>
+                        <div class="schedule-badge special">Opening</div>
+                    </div>
+
+                    <div class="schedule-row">
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-file-alt"></i>
+                                <span>10:00 AM – 11:15 AM</span>
+                            </div>
+                            <div class="schedule-info">
+                                <h3>Pitch The Deck</h3>
+                                <p>Paper Presentation</p>
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>10:00 AM – 11:15 AM</span>
+                            </div>
+                            <div class="schedule-info">
+                                <h3>Plot Perfect</h3>
+                                <p>Data Visualization</p>
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-search"></i>
+                                <span>10:00 AM – 11:15 AM</span>
+                            </div>
+                            <div class="schedule-info">
+                                <h3>One Piece</h3>
+                                <p>Treasure Hunt</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-row">
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-brain"></i>
+                                <span>11:30 AM – 1:00 PM</span>
+                            </div>
+                            <div class="schedule-info">
+                                <h3>Thinkathon</h3>
+                                <p>Tech Quiz</p>
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <div class="schedule-time">
+                                <i class="fas fa-gavel"></i>
+                                <span>11:30 AM – 1:00 PM</span>
+                            </div>
+                            <div class="schedule-info">
+                                <h3>Mega Auction</h3>
+                                <p>IPL Auction</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-card lunch">
+                        <div class="schedule-time">
+                            <i class="fas fa-utensils"></i>
+                            <span>1:00 PM – 2:00 PM</span>
+                        </div>
+                        <div class="schedule-info">
+                            <h3>Lunch Break</h3>
+                            <p>Refreshments provided</p>
+                        </div>
+                        <div class="schedule-badge">Break</div>
+                    </div>
+
+                    <div class="schedule-card valedictory">
+                        <div class="schedule-time">
+                            <i class="fas fa-trophy"></i>
+                            <span>2:00 PM – 3:00 PM</span>
+                        </div>
+                        <div class="schedule-info">
+                            <h3>Validatory</h3>
+                            <p>Prize Distribution & Closing Ceremony</p>
+                        </div>
+                        <div class="schedule-badge special">Closing</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ EVENTS ═══ -->
+        <section id="events" class="events">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title"><span class="gradient-text">Events</span></h2>
+                    <p class="section-subtitle">Five exciting challenges across data science domains</p>
+                </div>
+                <div class="events-grid">
+
+                    <!-- Pitch The Deck -->
+                    <div class="event-card" data-event="pitch-the-deck">
+                        <div class="card-glow"></div>
+                        <div class="event-header">
+                            <div class="event-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="event-tag">Paper Presentation</div>
+                        </div>
+                        <h3>Pitch The Deck</h3>
+                        <p>Present your innovative data science research to industry experts. Topics spanning Machine Learning, AI, Big Data, NLP, IoT, and Cloud Computing.</p>
+                        <div class="event-details">
+                            <span class="detail-chip"><i class="fas fa-users"></i> 2 per Team</span>
+                            <span class="detail-chip"><i class="fas fa-clock"></i> 6 min + 2 min Q&A</span>
+                            <span class="detail-chip"><i class="fas fa-layer-group"></i> 1 Team/Dept</span>
+                        </div>
+                        <div class="event-themes">
+                            <p class="themes-label"><i class="fas fa-tag"></i> Themes</p>
+                            <div class="theme-tags">
+                                <span>Machine Learning</span>
+                                <span>Artificial Intelligence</span>
+                                <span>Big Data</span>
+                                <span>NLP</span>
+                                <span>IoT</span>
+                                <span>Cloud Computing</span>
+                            </div>
+                        </div>
+                        <div class="event-timing">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>10:00 AM – 11:15 AM</span>
+                        </div>
+                        <a href="/register?event=Pitch%20The%20Deck" class="event-button">
+                            <span>Register Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- Plot Perfect -->
+                    <div class="event-card" data-event="plot-perfect">
+                        <div class="card-glow"></div>
+                        <div class="event-header">
+                            <div class="event-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div class="event-tag">Data Visualization</div>
+                        </div>
+                        <h3>Plot Perfect</h3>
+                        <p>Create the most imaginative visual display and in-depth narrative interpretation of data using industry-standard tools.</p>
+                        <div class="event-details">
+                            <span class="detail-chip"><i class="fas fa-users"></i> 2 per Team</span>
+                            <span class="detail-chip"><i class="fas fa-clock"></i> 6 min + 2 min Q&A</span>
+                            <span class="detail-chip"><i class="fas fa-layer-group"></i> 1 Team/Dept</span>
+                        </div>
+                        <div class="event-themes">
+                            <p class="themes-label"><i class="fas fa-tools"></i> Tools Allowed</p>
+                            <div class="theme-tags">
+                                <span>Power BI</span>
+                                <span>Python</span>
+                                <span>R / R-Studio</span>
+                                <span>Tableau</span>
+                            </div>
+                        </div>
+                        <div class="event-timing">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>10:00 AM – 11:15 AM</span>
+                        </div>
+                        <a href="/register?event=Plot%20Perfect" class="event-button">
+                            <span>Register Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- One Piece -->
+                    <div class="event-card" data-event="one-piece">
+                        <div class="card-glow"></div>
+                        <div class="event-header">
+                            <div class="event-icon"><i class="fas fa-search"></i></div>
+                            <div class="event-tag">Treasure Hunt</div>
+                        </div>
+                        <h3>One Piece</h3>
+                        <p>Embark on an exciting treasure hunt challenge. Prelims will be conducted to shortlist teams for the final round.</p>
+                        <div class="event-details">
+                            <span class="detail-chip"><i class="fas fa-users"></i> 2 per Team</span>
+                            <span class="detail-chip"><i class="fas fa-filter"></i> Prelims + Finals</span>
+                            <span class="detail-chip"><i class="fas fa-layer-group"></i> 1 Team/Dept</span>
+                        </div>
+                        <div class="event-timing">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>10:00 AM – 11:15 AM</span>
+                        </div>
+                        <a href="/register?event=One%20Piece" class="event-button">
+                            <span>Register Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- Thinkathon -->
+                    <div class="event-card" data-event="thinkathon">
+                        <div class="card-glow"></div>
+                        <div class="event-header">
+                            <div class="event-icon"><i class="fas fa-brain"></i></div>
+                            <div class="event-tag">Quiz</div>
+                        </div>
+                        <h3>Thinkathon</h3>
+                        <p>Battle of wits across technology domains. Prelims to shortlist teams for the finals. Round rules revealed on the spot!</p>
+                        <div class="event-details">
+                            <span class="detail-chip"><i class="fas fa-users"></i> 2 per Team</span>
+                            <span class="detail-chip"><i class="fas fa-filter"></i> Prelims + Finals</span>
+                            <span class="detail-chip"><i class="fas fa-layer-group"></i> 1 Team/Dept</span>
+                        </div>
+                        <div class="event-timing">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>11:30 AM – 1:00 PM</span>
+                        </div>
+                        <a href="/register?event=Thinkathon" class="event-button">
+                            <span>Register Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- Mega Auction -->
+                    <div class="event-card" data-event="mega-auction">
+                        <div class="card-glow"></div>
+                        <div class="event-header">
+                            <div class="event-icon"><i class="fas fa-gavel"></i></div>
+                            <div class="event-tag">IPL Auction</div>
+                        </div>
+                        <h3>Mega Auction</h3>
+                        <p>Experience the thrill of an IPL-style auction! Strategy, budget management, and quick thinking will determine the champion team.</p>
+                        <div class="event-details">
+                            <span class="detail-chip"><i class="fas fa-users"></i> 2 per Team</span>
+                            <span class="detail-chip"><i class="fas fa-filter"></i> Prelims + Finals</span>
+                            <span class="detail-chip"><i class="fas fa-layer-group"></i> 1 Team/Dept</span>
+                        </div>
+                        <div class="event-timing">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>11:30 AM – 1:00 PM</span>
+                        </div>
+                        <a href="/register?event=Mega%20Auction" class="event-button">
+                            <span>Register Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══ CONTACT ═══ -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title"><span class="gradient-text">Get In Touch</span></h2>
+                    <p class="section-subtitle">Reach out for registrations and event queries</p>
+                </div>
+
+                <div class="coord-section-title">
+                    <h3><i class="fas fa-user-shield"></i> Event Coordinators</h3>
+                </div>
+
+                <div class="coord-grid">
+                    <div class="coord-card">
+                        <div class="coord-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                        <div class="coord-details">
+                            <span class="coord-event">Pitch The Deck</span>
+                            <h4 class="coord-name">Bhavadharini</h4>
+                            <a href="tel:+917550286007" class="coord-phone"><i class="fas fa-phone-alt"></i> +91 7550286007</a>
+                        </div>
+                    </div>
+
+                    <div class="coord-card">
+                        <div class="coord-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="coord-details">
+                            <span class="coord-event">Plot Perfect</span>
+                            <h4 class="coord-name">Aslin</h4>
+                            <a href="tel:+918122090312" class="coord-phone"><i class="fas fa-phone-alt"></i> +91 8122090312</a>
+                        </div>
+                    </div>
+
+                    <div class="coord-card">
+                        <div class="coord-icon"><i class="fas fa-puzzle-piece"></i></div>
+                        <div class="coord-details">
+                            <span class="coord-event">One Piece</span>
+                            <h4 class="coord-name">Jojo</h4>
+                            <a href="tel:+918281337558" class="coord-phone"><i class="fas fa-phone-alt"></i> +91 8281337558</a>
+                        </div>
+                    </div>
+
+                    <div class="coord-card">
+                        <div class="coord-icon"><i class="fas fa-lightbulb"></i></div>
+                        <div class="coord-details">
+                            <span class="coord-event">Thinkathon</span>
+                            <h4 class="coord-name">Kowsalya</h4>
+                            <a href="tel:+917904480229" class="coord-phone"><i class="fas fa-phone-alt"></i> +91 7904480229</a>
+                        </div>
+                    </div>
+
+                    <div class="coord-card">
+                        <div class="coord-icon"><i class="fas fa-gavel"></i></div>
+                        <div class="coord-details">
+                            <span class="coord-event">IPL Auction</span>
+                            <h4 class="coord-name">Divakar</h4>
+                            <a href="tel:+917339006278" class="coord-phone"><i class="fas fa-phone-alt"></i> +91 7339006278</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-email-card">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="contact-text">
+                            <h4>Email</h4>
+                            <p><a href="mailto:datavista2026@gmail.com" class="email-link">datavista2026@gmail.com</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="logo-icon small">
+                        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="20,2 37,11 37,29 20,38 3,29 3,11" fill="none" stroke="url(#hexG2)" stroke-width="2"/>
+                            <circle cx="20" cy="20" r="5" fill="url(#hexG2)"/>
+                            <defs>
+                                <linearGradient id="hexG2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#F0C96A"/>
+                                    <stop offset="100%" style="stop-color:#9A7420"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <span>DATA VISTA '26</span>
+                </div>
+                <p class="footer-copy">Organized by <strong>DATONS</strong> — Department of Data Science Association</p>
+                <p class="footer-sub">Madras Christian College (Autonomous) &nbsp;|&nbsp; Anderson Hall, Chennai &nbsp;|&nbsp; 31.08.2026</p>
+                <p class="footer-credit">&copy; 2026 DATA VISTA '26. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
