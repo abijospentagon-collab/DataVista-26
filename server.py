@@ -164,8 +164,12 @@ def style_data_row(ws, row_num):
 
 def find_row_by_reg_id(ws, reg_id):
     """Return (row_index, row_values) for the given Reg.ID, or (None, None)."""
+    target = str(reg_id or '').strip().upper()
+    if not target:
+        return None, None
     for row_idx in range(2, ws.max_row + 1):
-        if ws.cell(row=row_idx, column=IDX_REG_ID + 1).value == reg_id:
+        cell_val = str(ws.cell(row=row_idx, column=IDX_REG_ID + 1).value or '').strip().upper()
+        if cell_val == target:
             vals = [ws.cell(row=row_idx, column=c).value
                     for c in range(1, ws.max_column + 1)]
             return row_idx, vals
@@ -510,7 +514,7 @@ def api_checkin_get(reg_id):
     ws = wb.active
     row_idx, vals = find_row_by_reg_id(ws, reg_id)
     if row_idx is None:
-        return jsonify({'found': False, 'error': 'Registration not found'}), 404
+        return jsonify({'found': False, 'error': 'Registration ID not found. Please check and try again.'}), 200
 
     headers = [c.value for c in ws[1]]
     def get(col_name):

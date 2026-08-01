@@ -1,1 +1,15 @@
-[]
+{
+  "entries": [
+    {
+      "id": 1,
+      "reg_id": "DV26-PPF-H32RH",
+      "event": "Plot Perfect",
+      "college": "WCC",
+      "team": "JENCY & JOJO",
+      "score": 0,
+      "timestamp": "01-08-2026 17:29"
+    }
+  ],
+  "next_id": 2,
+  "last_updated": "01-08-2026 17:29"
+}
