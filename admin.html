@@ -593,7 +593,7 @@ function renderTable(rows) {
     rows.forEach(row => {
         const tr    = document.createElement('tr');
         const regId = row[1] || '';
-        const status = row[12] || 'Pending';
+        const status = row[11] || 'Pending';
         const checkedIn = status === 'Checked In';
         const statusBadge = checkedIn
             ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
@@ -613,9 +613,9 @@ function renderTable(rows) {
             <td>${row[6]??''}</td>
             <td style="font-weight:600;color:var(--text)">${row[7]??''}</td>
             <td>${row[8]??''}</td><td>${row[9]??''}</td>
-            <td style="color:var(--text-muted);white-space:nowrap">${row[11]??''}</td>
+            <td style="color:var(--text-muted);white-space:nowrap">${row[10]??''}</td>
             <td>${statusBadge}</td>
-            <td style="color:var(--text-muted);font-size:.78rem;white-space:nowrap">${row[13]??''}</td>
+            <td style="color:var(--text-muted);font-size:.78rem;white-space:nowrap">${row[12]??''}</td>
             <td>
                 <button class="btn-del" title="Delete registration"
                     data-regid="${regId}"
@@ -634,7 +634,7 @@ function applyFilters() {
     const st = document.getElementById('status-filter').value;
     renderTable(allRows.filter(row => {
         if (ev && row[2] !== ev) return false;
-        if (st && (row[12]||'Pending') !== st) return false;
+        if (st && (row[11]||'Pending') !== st) return false;
         if (q  && !row.join(' ').toLowerCase().includes(q)) return false;
         return true;
     }));

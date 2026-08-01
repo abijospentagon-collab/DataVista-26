@@ -174,6 +174,9 @@ def find_row_by_reg_id(ws, reg_id):
 # ── Leaderboard helpers ───────────────────────────────
 def sync_registrations_to_lb(lb_data):
     """Sync enrolled participants from registrations.xlsx into leaderboard.json."""
+    if not isinstance(lb_data, dict):
+        lb_data = {'entries': lb_data if isinstance(lb_data, list) else [], 'next_id': 1, 'last_updated': ''}
+
     if not os.path.exists(EXCEL_PATH):
         return lb_data
 
@@ -183,7 +186,7 @@ def sync_registrations_to_lb(lb_data):
 
         existing = {}
         for entry in lb_data.get('entries', []):
-            if 'reg_id' in entry and entry['reg_id']:
+            if isinstance(entry, dict) and 'reg_id' in entry and entry['reg_id']:
                 existing[entry['reg_id']] = entry
 
         new_entries = []
@@ -233,7 +236,7 @@ def sync_registrations_to_lb(lb_data):
 
         # Retain manual entries if any don't have reg_id
         for entry in lb_data.get('entries', []):
-            if not entry.get('reg_id') and entry not in new_entries:
+            if isinstance(entry, dict) and not entry.get('reg_id') and entry not in new_entries:
                 new_entries.append(entry)
 
         lb_data['entries'] = new_entries
@@ -246,14 +249,21 @@ def load_lb():
     if not os.path.exists(LEADERBOARD_PATH):
         data = {'entries': [], 'next_id': 1, 'last_updated': ''}
     else:
-        with open(LEADERBOARD_PATH, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        try:
+            with open(LEADERBOARD_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if not isinstance(data, dict):
+                data = {'entries': data if isinstance(data, list) else [], 'next_id': 1, 'last_updated': ''}
+        except Exception:
+            data = {'entries': [], 'next_id': 1, 'last_updated': ''}
 
     data = sync_registrations_to_lb(data)
     save_lb(data)
     return data
 
 def save_lb(data):
+    if not isinstance(data, dict):
+        data = {'entries': data if isinstance(data, list) else [], 'next_id': 1, 'last_updated': ''}
     data['last_updated'] = datetime.now().strftime('%d-%m-%Y %H:%M')
     with open(LEADERBOARD_PATH, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
