@@ -53,7 +53,7 @@ EVENT_CODES = {
     'Plot Perfect':   'PPF',
     'One Piece':      'OPC',
     'Thinkathon':     'THK',
-    'Mega Auction':   'MAU'
+    'Pitch Perfect':  'PPR'
 }
 EVENTS = list(EVENT_CODES.keys())
 

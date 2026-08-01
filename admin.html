@@ -355,7 +355,7 @@
                     <option>Plot Perfect</option>
                     <option>One Piece</option>
                     <option>Thinkathon</option>
-                    <option>Mega Auction</option>
+                    <option>Pitch Perfect</option>
                 </select>
                 <select class="fsel" id="status-filter">
                     <option value="">All Status</option>
@@ -401,7 +401,7 @@
                     <option>Plot Perfect</option>
                     <option>One Piece</option>
                     <option>Thinkathon</option>
-                    <option>Mega Auction</option>
+                    <option>Pitch Perfect</option>
                 </select>
                 <button class="btn-dl" style="background:rgba(212,168,67,0.12);color:var(--gold-light);border:1px solid var(--border)" onclick="toggleManualAddModal()">
                     <i class="fas fa-plus"></i> Add Manual Entry
@@ -423,7 +423,7 @@
                             <option>Plot Perfect</option>
                             <option>One Piece</option>
                             <option>Thinkathon</option>
-                            <option>Mega Auction</option>
+                            <option>Pitch Perfect</option>
                         </select>
                     </div>
                     <div>
@@ -545,8 +545,8 @@ async function loadData() {
         // Remove old event cards (keep the total card)
         statsRow.querySelectorAll('.stat-card:not(.total)').forEach(c => c.remove());
 
-        const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
-        const icons  = ['fa-file-alt','fa-chart-bar','fa-search','fa-brain','fa-gavel'];
+        const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Pitch Perfect'];
+        const icons  = ['fa-file-alt','fa-chart-bar','fa-search','fa-brain','fa-briefcase'];
         events.forEach((ev, i) => {
             const total   = counts[ev]   || 0;
             const present = checkinCounts[ev] || 0;
@@ -708,7 +708,7 @@ function renderLbTable() {
     });
 
     // Group by event, assign per-event rank based on score desc
-    const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
+    const events = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Pitch Perfect'];
     const evGroups = {};
     events.forEach(ev => { evGroups[ev] = []; });
     shown.forEach(e => { if (evGroups[e.event]) evGroups[e.event].push(e); else evGroups[e.event] = [e]; });

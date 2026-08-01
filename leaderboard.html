@@ -300,8 +300,8 @@
     <button class="tab" data-event="Thinkathon" onclick="setTab('Thinkathon')">
         <i class="fas fa-brain"></i> Thinkathon
     </button>
-    <button class="tab" data-event="Mega Auction" onclick="setTab('Mega Auction')">
-        <i class="fas fa-gavel"></i> Mega Auction
+    <button class="tab" data-event="Pitch Perfect" onclick="setTab('Pitch Perfect')">
+        <i class="fas fa-briefcase"></i> Pitch Perfect
     </button>
 </div>
 
@@ -330,7 +330,7 @@ const EVENT_ICONS  = {
     'Plot Perfect'   : 'fas fa-chart-bar',
     'One Piece'      : 'fas fa-search',
     'Thinkathon'     : 'fas fa-brain',
-    'Mega Auction'   : 'fas fa-gavel'
+    'Pitch Perfect'  : 'fas fa-briefcase'
 };
 const RANK_TROPHY  = { 1:'🥇', 2:'🥈', 3:'🥉' };
 
@@ -404,7 +404,7 @@ function render(entries) {
 
     // Group by event
     const groups = {};
-    const order  = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Mega Auction'];
+    const order  = ['Pitch The Deck','Plot Perfect','One Piece','Thinkathon','Pitch Perfect'];
     filtered.forEach(e => {
         if (!groups[e.event]) groups[e.event] = [];
         groups[e.event].push(e);
