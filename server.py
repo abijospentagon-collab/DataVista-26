@@ -372,7 +372,7 @@ def build_confirmation_email(d, reg_id, checkin_url):
       <p style="color:#7A6035;font-size:12px;margin:0;line-height:1.9;">
         &#x2022;&nbsp; Only <strong style="color:#C9A45A;">1 team per department</strong> is allowed per event.<br>
         &#x2022;&nbsp; Bring your valid <strong style="color:#C9A45A;">College ID card</strong> on the event day.<br>
-        &#x2022;&nbsp; Show this email's <strong style="color:#C9A45A;">QR Code</strong> at check-in for instant attendance marking.<br>
+        &#x2022;&nbsp; Show this email's <strong style="color:#C9A45A;">Registration ID</strong> at check-in for attendance marking.<br>
         &#x2022;&nbsp; Adhere to all event rules as per the official rule book.
       </p>
     </td>
