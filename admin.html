@@ -508,22 +508,30 @@ document.getElementById('login-form').addEventListener('submit', async function(
     }
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying…';
+
+    let json;
     try {
-        const res  = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) });
-        const json = await res.json();
-        if (json.success) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display    = 'flex';
-            loadData();
-        } else {
-            document.getElementById('login-error-text').textContent = json.message || 'Invalid credentials.';
-            errBox.classList.add('show');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        }
+        const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        json = await res.json();
     } catch (err) {
-        console.error('Login error:', err);
-        document.getElementById('login-error-text').textContent = 'Server unreachable. Please reload http://localhost:5000/admin';
+        console.error('Login request error:', err);
+        document.getElementById('login-error-text').textContent = 'Cannot connect to server. Check your connection.';
+        errBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        return;
+    }
+
+    if (json && json.success) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display    = 'flex';
+        loadData().catch(err => console.error('Error loading admin dashboard:', err));
+    } else {
+        document.getElementById('login-error-text').textContent = (json && json.message) || 'Invalid credentials.';
         errBox.classList.add('show');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
