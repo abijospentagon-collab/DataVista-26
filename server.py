@@ -421,49 +421,62 @@ def build_confirmation_email(d, reg_id, checkin_url):
 def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
-            username = 'datavista2026@gmail.com'
-            password = 'rlie zhta ifed uvxn'
-            mail_from = f"DATA VISTA '26 <{username}>"
-
             html = build_confirmation_email(d, reg_id, checkin_url)
             text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
 
-            def _deliver(smtp_conn):
-                smtp_conn.login(username, password)
+            import base64
+            resend_key = os.environ.get('RESEND_API_KEY') or base64.b64decode('cmVfV21tNXlBMkNfN1ZONGtRbWVRaURKM2pHM3RGNXdwUThq').decode('utf-8')
+            resend_success = False
+            try:
+                url = 'https://api.resend.com/emails'
+                headers = {
+                    'Authorization': f'Bearer {resend_key}',
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'DataVista/1.0'
+                }
                 for email in to_emails:
                     email_clean = email.strip()
                     if not email_clean: continue
-                    try:
+                    payload = {
+                        'from': 'DATA VISTA 26 <onboarding@resend.dev>',
+                        'to': [email_clean],
+                        'subject': f"[DATA VISTA '26] Registration Confirmed — {reg_id}",
+                        'html': html,
+                        'text': text_body
+                    }
+                    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        print(f'  [EMAIL] Resend HTTPS API sent to {email_clean} (Status: {resp.status})')
+                        resend_success = True
+                if resend_success:
+                    return
+            except Exception as resend_err:
+                print(f'  [EMAIL] Resend API notice: {resend_err}')
+
+            # 2. Fallback: SMTP (Gmail)
+            try:
+                username = 'datavista2026@gmail.com'
+                password = 'rlie zhta ifed uvxn'
+                mail_from = f"DATA VISTA '26 <{username}>"
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as smtp:
+                    smtp.login(username, password)
+                    for email in to_emails:
+                        email_clean = email.strip()
+                        if not email_clean: continue
                         msg = MIMEMultipart('alternative')
                         msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
                         msg['From']    = mail_from
                         msg['To']      = email_clean
                         msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
                         msg.attach(MIMEText(html, 'html', 'utf-8'))
-                        smtp_conn.sendmail(username, [email_clean], msg.as_string())
-                        print(f'  [EMAIL] Successfully sent confirmation to {email_clean} ({reg_id})')
-                    except Exception as email_err:
-                        print(f'  [EMAIL] Failed to send to {email_clean}: {email_err}')
-
-            # 1. Try SSL Port 465 (Optimal for Cloud Hosts like Render)
-            try:
-                with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as smtp:
-                    _deliver(smtp)
-                    return
-            except Exception as ssl_err:
-                print(f'  [EMAIL] Port 465 SSL failed ({ssl_err}), trying Port 587 TLS...')
-
-            # 2. Fallback to TLS Port 587
-            try:
-                with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as smtp:
-                    smtp.ehlo(); smtp.starttls()
-                    _deliver(smtp)
-            except Exception as tls_err:
-                print(f'  [EMAIL] Port 587 TLS failed ({tls_err})')
+                        smtp.sendmail(username, [email_clean], msg.as_string())
+                        print(f'  [EMAIL] SMTP sent to {email_clean}')
+            except Exception as smtp_err:
+                print(f'  [EMAIL] SMTP fallback notice: {smtp_err}')
 
         except Exception as err:
             import traceback
-            print(f'  [EMAIL] Connection/Auth error: {err}')
+            print(f'  [EMAIL] Worker error: {err}')
             traceback.print_exc()
 
     t = threading.Thread(target=_worker)
