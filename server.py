@@ -424,21 +424,27 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
 
             html = build_confirmation_email(d, reg_id, checkin_url)
             text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
-            msg  = MIMEMultipart('alternative')
-            msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
-            msg['From']    = mail_from
-            msg['To']      = ', '.join(to_emails)
-            msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
-            msg.attach(MIMEText(html, 'html', 'utf-8'))
 
             with smtplib.SMTP(server_host, server_port, timeout=15) as smtp:
                 smtp.ehlo(); smtp.starttls()
                 smtp.login(username, password)
-                smtp.sendmail(username, to_emails, msg.as_string())
-            print(f'  [EMAIL] Successfully sent confirmation to {to_emails} ({reg_id})')
+                for email in to_emails:
+                    email_clean = email.strip()
+                    if not email_clean: continue
+                    try:
+                        msg = MIMEMultipart('alternative')
+                        msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
+                        msg['From']    = mail_from
+                        msg['To']      = email_clean
+                        msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
+                        msg.attach(MIMEText(html, 'html', 'utf-8'))
+                        smtp.sendmail(username, [email_clean], msg.as_string())
+                        print(f'  [EMAIL] Successfully sent confirmation to {email_clean} ({reg_id})')
+                    except Exception as email_err:
+                        print(f'  [EMAIL] Failed to send to {email_clean}: {email_err}')
         except Exception as err:
             import traceback
-            print(f'  [EMAIL] Error sending email: {err}')
+            print(f'  [EMAIL] Connection/Auth error: {err}')
             traceback.print_exc()
     threading.Thread(target=_worker, daemon=True).start()
 
