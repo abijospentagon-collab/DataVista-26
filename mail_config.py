@@ -20,7 +20,7 @@ MAIL_ENABLED  = True
 MAIL_SERVER   = 'smtp.gmail.com'
 MAIL_PORT     = 587
 
-MAIL_USERNAME = (os.environ.get('MAIL_USERNAME') or 'datavista2026@gmail.com').strip()
-MAIL_PASSWORD = (os.environ.get('MAIL_PASSWORD') or 'rlie zhta ifed uvxn').strip()
+MAIL_USERNAME = 'datavista2026@gmail.com'
+MAIL_PASSWORD = 'rlie zhta ifed uvxn'
 
 MAIL_FROM     = f"DATA VISTA '26 <{MAIL_USERNAME}>"
