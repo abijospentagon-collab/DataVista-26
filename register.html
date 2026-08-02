@@ -387,27 +387,37 @@
                 <h2>Registration Confirmed!</h2>
                 <p>Your team is all set for <strong style="color:var(--gold-light)">DATA VISTA '26</strong>.<br>31st August 2026 &bull; Anderson Hall, MCC.</p>
 
-                <!-- Registration ID -->
-                <div class="reg-id-box">
-                    <div class="reg-id-label"><i class="fas fa-id-badge"></i>&nbsp; Registration ID</div>
+                <!-- Registration ID Card -->
+                <div class="reg-id-box" style="position:relative;overflow:hidden;background:linear-gradient(135deg, rgba(212,168,67,0.12), rgba(15,2,9,0.9));border:2px solid var(--gold);box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(212,168,67,0.2);padding-bottom:0.5rem;margin-bottom:0.75rem;">
+                        <div class="reg-id-label" style="margin:0"><i class="fas fa-ticket-alt"></i> &nbsp;OFFICIAL EVENT PASS</div>
+                        <span style="font-size:0.7rem;color:var(--gold-light);background:rgba(212,168,67,0.2);padding:2px 8px;border-radius:100px;font-weight:700">DATA VISTA '26</span>
+                    </div>
                     <div class="reg-id-row">
                         <span class="reg-id-value" id="reg-id-val">—</span>
                         <button class="btn-copy" id="copy-btn" onclick="copyRegId()">
-                            <i class="fas fa-copy"></i> Copy
+                            <i class="fas fa-copy"></i> Copy ID
                         </button>
                     </div>
                 </div>
 
-                <!-- Show at desk note -->
-                <div style="margin:.8rem 0;padding:.75rem 1.1rem;
-                    background:rgba(212,168,67,0.07);border:1px solid rgba(212,168,67,0.2);
-                    border-radius:10px;text-align:center;font-size:.82rem;color:var(--text-muted);">
-                    <i class="fas fa-id-badge" style="color:var(--gold-light);margin-right:6px"></i>
-                    Show this <strong style="color:var(--gold-light)">Registration ID</strong> to the team at the venue for attendance
+                <!-- 1-Click Email Pass & Print Actions -->
+                <div style="width:100%;display:flex;flex-direction:column;gap:0.6rem;margin-top:0.5rem;">
+                    <a id="btn-email-pass" href="#" target="_blank" class="btn-back" style="background:linear-gradient(135deg, var(--gold), var(--gold-dark));color:#0F0209;border:none;font-weight:800;justify-content:center;box-shadow:0 4px 15px rgba(212,168,67,0.3);">
+                        <i class="fas fa-paper-plane"></i> 📩 Send Pass to My Email App
+                    </a>
+                    <button onclick="window.print()" class="btn-back" style="justify-content:center;background:rgba(255,255,255,0.05);">
+                        <i class="fas fa-print"></i> 📄 Download / Print Pass (PDF)
+                    </button>
                 </div>
 
-                <!-- Email status -->
-                <div class="email-status" id="email-status"></div>
+                <!-- Show at desk note -->
+                <div style="margin:.4rem 0;padding:.75rem 1.1rem;
+                    background:rgba(212,168,67,0.07);border:1px solid rgba(212,168,67,0.2);
+                    border-radius:10px;text-align:center;font-size:.82rem;color:var(--text-muted);">
+                    <i class="fas fa-qrcode" style="color:var(--gold-light);margin-right:6px"></i>
+                    Show this <strong style="color:var(--gold-light)">Registration ID Pass</strong> at the entrance desk for check-in
+                </div>
 
                 <!-- Summary -->
                 <div class="success-details" id="success-details"></div>
@@ -628,21 +638,25 @@
                 document.getElementById('form-screen').style.display = 'none';
                 document.getElementById('success-screen').classList.add('show');
 
-                // ── Registration ID ──
+                // ── Registration ID & 1-Click Email Pass ──
                 const regId = json.reg_id || '';
                 document.getElementById('reg-id-val').textContent = regId;
 
-                // ── Email status banner ──
-                const esBanner = document.getElementById('email-status');
-                if (json.email_sent) {
-                    esBanner.className = 'email-status sent';
-                    esBanner.innerHTML = `<i class="fas fa-envelope-check" style="color:#4ADE80"></i>
-                        Confirmation email sent to <strong>${data.p1email}</strong>`;
-                } else {
-                    esBanner.className = 'email-status skipped';
-                    esBanner.innerHTML = `<i class="fas fa-envelope"></i>
-                        Save your Registration ID — email notifications not configured`;
-                }
+                const mailSubject = encodeURIComponent(`[DATA VISTA '26] Registration Pass — ${regId}`);
+                const mailBody = encodeURIComponent(
+                    `DATA VISTA '26 — Official Registration Pass\n` +
+                    `==========================================\n\n` +
+                    `Registration ID: ${regId}\n` +
+                    `Event: ${eventName}\n` +
+                    `College: ${data.college}\n` +
+                    `Department: ${data.department}\n` +
+                    `Participant 1: ${data.p1name} (${data.p1email})\n` +
+                    `Participant 2: ${data.p2name} (${data.p2email})\n` +
+                    `Check-In Link: ${json.checkin_url || ''}\n\n` +
+                    `Present this Registration Pass at the venue entrance desk for event attendance.`
+                );
+                const recipients = [data.p1email, data.p2email].filter(Boolean).join(',');
+                document.getElementById('btn-email-pass').href = `mailto:${recipients}?subject=${mailSubject}&body=${mailBody}`;
 
                 // ── Summary table ──
                 const details = [

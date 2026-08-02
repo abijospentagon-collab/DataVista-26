@@ -421,48 +421,27 @@ def build_confirmation_email(d, reg_id, checkin_url):
 def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
-            html = build_confirmation_email(d, reg_id, checkin_url)
-            text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
+            username = 'datavista2026@gmail.com'
+            password = 'rlie zhta ifed uvxn'
+            mail_from = f"DATA VISTA '26 <{username}>"
 
-            import base64
-            resend_key = os.environ.get('RESEND_API_KEY') or base64.b64decode('cmVfV21tNXlBMkNfN1ZONGtRbWVRaURKM2pHM3RGNXdwUThq').decode('utf-8')
-            resend_success = False
-            try:
-                url = 'https://api.resend.com/emails'
-                headers = {
-                    'Authorization': f'Bearer {resend_key}',
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'DataVista/1.0'
-                }
+            html = build_confirmation_email(d, reg_id, checkin_url)
+            text_body = (
+                f"DATA VISTA '26 — Registration Confirmed!\n\n"
+                f"Event: {d.get('event','')}\nRegistration ID: {reg_id}\n"
+                f"College: {d.get('college','')}\n"
+                f"Participant 1: {d.get('p1name','')}\n"
+                f"Participant 2: {d.get('p2name','')}\n\n"
+                f"Check-In Link: {checkin_url}"
+            )
+
+            # Standard Gmail SMTP (Port 465 SSL)
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15) as smtp:
+                smtp.login(username, password)
                 for email in to_emails:
                     email_clean = email.strip()
                     if not email_clean: continue
-                    payload = {
-                        'from': 'DATA VISTA 26 <onboarding@resend.dev>',
-                        'to': [email_clean],
-                        'subject': f"[DATA VISTA '26] Registration Confirmed — {reg_id}",
-                        'html': html,
-                        'text': text_body
-                    }
-                    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
-                    with urllib.request.urlopen(req, timeout=10) as resp:
-                        print(f'  [EMAIL] Resend HTTPS API sent to {email_clean} (Status: {resp.status})')
-                        resend_success = True
-                if resend_success:
-                    return
-            except Exception as resend_err:
-                print(f'  [EMAIL] Resend API notice: {resend_err}')
-
-            # 2. Fallback: SMTP (Gmail)
-            try:
-                username = 'datavista2026@gmail.com'
-                password = 'rlie zhta ifed uvxn'
-                mail_from = f"DATA VISTA '26 <{username}>"
-                with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as smtp:
-                    smtp.login(username, password)
-                    for email in to_emails:
-                        email_clean = email.strip()
-                        if not email_clean: continue
+                    try:
                         msg = MIMEMultipart('alternative')
                         msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
                         msg['From']    = mail_from
@@ -470,18 +449,19 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
                         msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
                         msg.attach(MIMEText(html, 'html', 'utf-8'))
                         smtp.sendmail(username, [email_clean], msg.as_string())
-                        print(f'  [EMAIL] SMTP sent to {email_clean}')
-            except Exception as smtp_err:
-                print(f'  [EMAIL] SMTP fallback notice: {smtp_err}')
+                        print(f'  [EMAIL] Gmail SMTP sent to {email_clean} ({reg_id})')
+                    except Exception as single_err:
+                        print(f'  [EMAIL] Failed to send to {email_clean}: {single_err}')
 
         except Exception as err:
             import traceback
-            print(f'  [EMAIL] Worker error: {err}')
+            print(f'  [EMAIL] Gmail SMTP worker error: {err}')
             traceback.print_exc()
 
     t = threading.Thread(target=_worker)
     t.daemon = False
     t.start()
+
 
 # ── Auth decorator ────────────────────────────────────
 def admin_required(f):
