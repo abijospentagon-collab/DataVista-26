@@ -77,13 +77,18 @@ LOCAL_IP = get_local_ip()
 def get_checkin_base():
     env_base = os.environ.get('APP_URL', '').strip()
     if env_base:
+        if 'datavista26.onrender.com' in env_base:
+            env_base = env_base.replace('datavista26.onrender.com', 'datavista-26.onrender.com')
         return env_base.rstrip('/')
     try:
         if request and hasattr(request, 'host_url'):
-            return request.host_url.rstrip('/')
+            host = request.host_url.rstrip('/')
+            if 'datavista26.onrender.com' in host:
+                host = host.replace('datavista26.onrender.com', 'datavista-26.onrender.com')
+            return host
     except Exception:
         pass
-    return f'http://{LOCAL_IP}:5000'
+    return 'https://datavista-26.onrender.com'
 
 # ── Mail config ───────────────────────────────────────
 try:
