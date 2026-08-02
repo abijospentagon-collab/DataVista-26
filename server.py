@@ -21,8 +21,8 @@ from datetime import datetime
 BASE_DIR         = os.path.dirname(os.path.abspath(__file__))
 EXCEL_PATH       = os.path.join(BASE_DIR, 'registrations.xlsx')
 LEADERBOARD_PATH = os.path.join(BASE_DIR, 'leaderboard.json')
-ADMIN_USER       = 'admin'
-ADMIN_PASS       = 'DataVista@26'
+ADMIN_USER       = os.environ.get('ADMIN_USER', 'admin')
+ADMIN_PASS       = os.environ.get('ADMIN_PASS', 'DataVista@26')
 
 HEADERS = [
     'S.No', 'Reg. ID', 'Event', 'College', 'Department',
@@ -53,14 +53,15 @@ EVENT_CODES = {
     'Plot Perfect':   'PPF',
     'One Piece':      'OPC',
     'Thinkathon':     'THK',
+    'Treasure Hunt':  'TRH',
     'Pitch Perfect':  'PPR'
 }
 EVENTS = list(EVENT_CODES.keys())
 
 app = Flask(__name__)
-app.secret_key = 'dv26_mcc_secret_2026_xK9pQ'
+app.secret_key = os.environ.get('SECRET_KEY', 'dv26_mcc_secret_2026_xK9pQ')
 
-# ── Detect LAN IP for QR check-in URLs ───────────────
+# ── Detect LAN IP for fallback check-in URLs ───────────────
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -71,8 +72,18 @@ def get_local_ip():
     except Exception:
         return 'localhost'
 
-LOCAL_IP        = get_local_ip()
-CHECKIN_BASE    = f'http://{LOCAL_IP}:5000'
+LOCAL_IP = get_local_ip()
+
+def get_checkin_base():
+    env_base = os.environ.get('APP_URL', '').strip()
+    if env_base:
+        return env_base.rstrip('/')
+    try:
+        if request and hasattr(request, 'host_url'):
+            return request.host_url.rstrip('/')
+    except Exception:
+        pass
+    return f'http://{LOCAL_IP}:5000'
 
 # ── Mail config ───────────────────────────────────────
 try:
@@ -429,10 +440,14 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ── Page routes (no-cache to prevent stale login issues) ──────
+# ── Page routes (no-cache and CORS headers) ──────
 from flask import make_response
 
-def no_cache(response):
+@app.after_request
+def add_cors_and_cache_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma']        = 'no-cache'
     response.headers['Expires']       = '0'
@@ -440,24 +455,28 @@ def no_cache(response):
 
 @app.route('/')
 def index():
-    return no_cache(make_response(send_from_directory(BASE_DIR, 'index.html')))
+    return send_from_directory(BASE_DIR, 'index.html')
 
 @app.route('/register')
+@app.route('/register.html')
 def register_page():
-    return no_cache(make_response(send_from_directory(BASE_DIR, 'register.html')))
+    return send_from_directory(BASE_DIR, 'register.html')
 
 @app.route('/admin')
+@app.route('/admin.html')
 def admin_page():
-    return no_cache(make_response(send_from_directory(BASE_DIR, 'admin.html')))
+    return send_from_directory(BASE_DIR, 'admin.html')
 
 @app.route('/leaderboard')
+@app.route('/leaderboard.html')
 def leaderboard_page():
-    return no_cache(make_response(send_from_directory(BASE_DIR, 'leaderboard.html')))
+    return send_from_directory(BASE_DIR, 'leaderboard.html')
 
 @app.route('/checkin')
+@app.route('/checkin.html')
 @app.route('/checkin/<reg_id>')
 def checkin_page(reg_id=None):
-    return no_cache(make_response(send_from_directory(BASE_DIR, 'checkin.html')))
+    return send_from_directory(BASE_DIR, 'checkin.html')
 
 @app.route('/<path:filename>')
 def static_files(filename):
@@ -474,7 +493,7 @@ def api_register():
                 return jsonify({'success':False,'error':f'Missing: {f}'}), 400
 
         reg_id      = gen_reg_id(d['event'].strip())
-        checkin_url = f'{CHECKIN_BASE}/checkin/{reg_id}'
+        checkin_url = f'{get_checkin_base()}/checkin/{reg_id}'
 
         wb  = openpyxl.load_workbook(EXCEL_PATH)
         ws  = wb.active
@@ -576,16 +595,20 @@ def api_leaderboard_public():
                     'last_updated':data.get('last_updated','')})
 
 # ── Admin login / logout ──────────────────────────────
-@app.route('/api/admin/login', methods=['POST'])
+@app.route('/api/admin/login', methods=['POST', 'OPTIONS'])
 def api_login():
-    d = request.get_json(force=True) or {}
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
+    d = request.get_json(force=True, silent=True) or {}
     if d.get('username') == ADMIN_USER and d.get('password') == ADMIN_PASS:
         session['admin_logged_in'] = True
         return jsonify({'success':True})
     return jsonify({'success':False,'message':'Invalid credentials'}), 401
 
-@app.route('/api/admin/logout', methods=['POST'])
+@app.route('/api/admin/logout', methods=['POST', 'OPTIONS'])
 def api_logout():
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     session.clear()
     return jsonify({'success':True})
 
