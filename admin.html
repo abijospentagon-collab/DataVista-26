@@ -479,6 +479,14 @@
 </div><!-- /dashboard -->
 
 <script>
+const API_BASE = (function() {
+    if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
+    if (window.location.hostname.includes('github.io')) {
+        return 'https://datavista26.onrender.com';
+    }
+    return '';
+})();
+
 // ═══════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════
@@ -514,7 +522,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     let json;
     try {
-        const res = await fetch('/api/admin/login', {
+        const res = await fetch(`${API_BASE}/api/admin/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -546,7 +554,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
 // ═══════════════════════════════════════════════
 async function loadData() {
     try {
-        const res  = await fetch('/api/admin/registrations');
+        const res  = await fetch(`${API_BASE}/api/admin/registrations`);
         if (res.status === 401) { location.reload(); return; }
         const json = await res.json();
         allRows = json.rows || [];
@@ -668,7 +676,7 @@ async function deleteRegistration(btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res  = await fetch(`/api/admin/registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+        const res  = await fetch(`${API_BASE}/api/admin/registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
         const json = await res.json();
         if (json.success) {
             const tr = btnEl.closest('tr');
@@ -693,7 +701,7 @@ let editingLbId = null;
 
 async function loadLb() {
     try {
-        const res  = await fetch('/api/admin/leaderboard');
+        const res  = await fetch(`${API_BASE}/api/admin/leaderboard`);
         if (res.status === 401) { location.reload(); return; }
         const json = await res.json();
         lbEntries  = json.entries || [];
@@ -815,7 +823,7 @@ async function savePoints(id, btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res = await fetch(`/api/admin/leaderboard/${id}`, {
+        const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ score: scoreVal })
@@ -853,7 +861,7 @@ async function saveFullLbEdit(id, btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res = await fetch(`/api/admin/leaderboard/${id}`, {
+        const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ event: ev, college, team, score })
@@ -886,7 +894,7 @@ async function deleteLbEntry(id, btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res = await fetch(`/api/admin/leaderboard/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, { method: 'DELETE' });
         const json = await res.json();
         if (json.success) {
             lbEntries = lbEntries.filter(e => e.id !== id);
@@ -922,7 +930,7 @@ async function addManualEntry() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding';
 
     try {
-        const res = await fetch('/api/admin/leaderboard/add', {
+        const res = await fetch(`${API_BASE}/api/admin/leaderboard/add`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ event: ev, college, team, score })

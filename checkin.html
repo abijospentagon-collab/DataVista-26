@@ -337,6 +337,14 @@
 </div>
 
 <script>
+const API_BASE = (function() {
+    if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
+    if (window.location.hostname.includes('github.io')) {
+        return 'https://datavista26.onrender.com';
+    }
+    return '';
+})();
+
 let currentData = null;
 
 function lookupId() {
@@ -352,7 +360,7 @@ function lookupId() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-    fetch(`/api/checkin/${encodeURIComponent(rawInput)}`)
+    fetch(`${API_BASE}/api/checkin/${encodeURIComponent(rawInput)}`)
         .then(r => r.json())
         .then(data => {
             btn.disabled = false;
@@ -408,7 +416,7 @@ function markPresent() {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Marking…';
 
-    fetch(`/api/checkin/${encodeURIComponent(currentData.reg_id)}/mark`, { method: 'POST' })
+    fetch(`${API_BASE}/api/checkin/${encodeURIComponent(currentData.reg_id)}/mark`, { method: 'POST' })
         .then(r => r.json())
         .then(data => {
             if (data.success) {

@@ -513,6 +513,14 @@
     </div>
 
     <script>
+    const API_BASE = (function() {
+        if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
+        if (window.location.hostname.includes('github.io')) {
+            return 'https://datavista26.onrender.com';
+        }
+        return '';
+    })();
+
     // ── Event metadata ──────────────────────────────────
     const EVENT_DATA = {
         'Pitch The Deck': {
@@ -604,7 +612,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
         try {
-            const res = await fetch('/api/register', {
+            const res = await fetch(`${API_BASE}/api/register`, {
                 method : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body   : JSON.stringify(data)

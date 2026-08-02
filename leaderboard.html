@@ -326,6 +326,14 @@
 </div>
 
 <script>
+const API_BASE = (function() {
+    if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
+    if (window.location.hostname.includes('github.io')) {
+        return 'https://datavista26.onrender.com';
+    }
+    return '';
+})();
+
 // ── Config ────────────────────────────────────────────
 const REFRESH_SECS = 30;
 const EVENT_ICONS  = {
@@ -370,7 +378,7 @@ function setTab(ev) {
 // ── Fetch ─────────────────────────────────────────────
 async function fetchData() {
     try {
-        const res  = await fetch('/api/leaderboard');
+        const res  = await fetch(`${API_BASE}/api/leaderboard`);
         const json = await res.json();
         allData = json.entries || [];
 
