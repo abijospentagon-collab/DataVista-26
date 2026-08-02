@@ -417,12 +417,14 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
             html = build_confirmation_email(d, reg_id, checkin_url)
+            text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
             msg  = MIMEMultipart('alternative')
-            msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed \u2014 {reg_id}"
+            msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
             msg['From']    = mc.MAIL_FROM
             msg['To']      = ', '.join(to_emails)
+            msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
             msg.attach(MIMEText(html, 'html', 'utf-8'))
-            with smtplib.SMTP(mc.MAIL_SERVER, mc.MAIL_PORT) as smtp:
+            with smtplib.SMTP(mc.MAIL_SERVER, mc.MAIL_PORT, timeout=15) as smtp:
                 smtp.ehlo(); smtp.starttls()
                 smtp.login(mc.MAIL_USERNAME, mc.MAIL_PASSWORD)
                 smtp.sendmail(mc.MAIL_USERNAME, to_emails, msg.as_string())
