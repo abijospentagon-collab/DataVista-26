@@ -416,18 +416,15 @@ def build_confirmation_email(d, reg_id, checkin_url):
 def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
-            username = (os.environ.get('MAIL_USERNAME') or getattr(mc, 'MAIL_USERNAME', '') or 'datavista2026@gmail.com').strip()
-            password = (os.environ.get('MAIL_PASSWORD') or getattr(mc, 'MAIL_PASSWORD', '') or 'rlie zhta ifed uvxn').strip()
+            username = 'datavista2026@gmail.com'
+            password = 'rlie zhta ifed uvxn'
             mail_from = f"DATA VISTA '26 <{username}>"
-            server_host = getattr(mc, 'MAIL_SERVER', 'smtp.gmail.com')
-            server_port = int(getattr(mc, 'MAIL_PORT', 587))
 
             html = build_confirmation_email(d, reg_id, checkin_url)
             text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
 
-            with smtplib.SMTP(server_host, server_port, timeout=15) as smtp:
-                smtp.ehlo(); smtp.starttls()
-                smtp.login(username, password)
+            def _deliver(smtp_conn):
+                smtp_conn.login(username, password)
                 for email in to_emails:
                     email_clean = email.strip()
                     if not email_clean: continue
@@ -438,10 +435,24 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
                         msg['To']      = email_clean
                         msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
                         msg.attach(MIMEText(html, 'html', 'utf-8'))
-                        smtp.sendmail(username, [email_clean], msg.as_string())
+                        smtp_conn.sendmail(username, [email_clean], msg.as_string())
                         print(f'  [EMAIL] Successfully sent confirmation to {email_clean} ({reg_id})')
                     except Exception as email_err:
                         print(f'  [EMAIL] Failed to send to {email_clean}: {email_err}')
+
+            # 1. Try SSL Port 465 (Optimal for Cloud Hosts like Render)
+            try:
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15) as smtp:
+                    _deliver(smtp)
+                    return
+            except Exception as ssl_err:
+                print(f'  [EMAIL] Port 465 SSL failed ({ssl_err}), trying Port 587 TLS...')
+
+            # 2. Fallback to TLS Port 587
+            with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as smtp:
+                smtp.ehlo(); smtp.starttls()
+                _deliver(smtp)
+
         except Exception as err:
             import traceback
             print(f'  [EMAIL] Connection/Auth error: {err}')
