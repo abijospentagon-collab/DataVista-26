@@ -416,21 +416,30 @@ def build_confirmation_email(d, reg_id, checkin_url):
 def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
+            username = (os.environ.get('MAIL_USERNAME') or getattr(mc, 'MAIL_USERNAME', '') or 'datavista2026@gmail.com').strip()
+            password = (os.environ.get('MAIL_PASSWORD') or getattr(mc, 'MAIL_PASSWORD', '') or 'rlie zhta ifed uvxn').strip()
+            mail_from = f"DATA VISTA '26 <{username}>"
+            server_host = getattr(mc, 'MAIL_SERVER', 'smtp.gmail.com')
+            server_port = int(getattr(mc, 'MAIL_PORT', 587))
+
             html = build_confirmation_email(d, reg_id, checkin_url)
             text_body = f"DATA VISTA '26 — Registration Confirmed!\n\nEvent: {d.get('event','')}\nRegistration ID: {reg_id}\nCollege: {d.get('college','')}\nParticipant 1: {d.get('p1name','')}\nParticipant 2: {d.get('p2name','')}\n\nCheck-In Link: {checkin_url}"
             msg  = MIMEMultipart('alternative')
             msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
-            msg['From']    = mc.MAIL_FROM
+            msg['From']    = mail_from
             msg['To']      = ', '.join(to_emails)
             msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
             msg.attach(MIMEText(html, 'html', 'utf-8'))
-            with smtplib.SMTP(mc.MAIL_SERVER, mc.MAIL_PORT, timeout=15) as smtp:
+
+            with smtplib.SMTP(server_host, server_port, timeout=15) as smtp:
                 smtp.ehlo(); smtp.starttls()
-                smtp.login(mc.MAIL_USERNAME, mc.MAIL_PASSWORD)
-                smtp.sendmail(mc.MAIL_USERNAME, to_emails, msg.as_string())
-            print(f'  [EMAIL] Sent confirmation to {to_emails} ({reg_id})')
+                smtp.login(username, password)
+                smtp.sendmail(username, to_emails, msg.as_string())
+            print(f'  [EMAIL] Successfully sent confirmation to {to_emails} ({reg_id})')
         except Exception as err:
-            print(f'  [EMAIL] Failed: {err}')
+            import traceback
+            print(f'  [EMAIL] Error sending email: {err}')
+            traceback.print_exc()
     threading.Thread(target=_worker, daemon=True).start()
 
 # ── Auth decorator ────────────────────────────────────
@@ -516,11 +525,9 @@ def api_register():
         # Auto-sync new registration to Leaderboard
         load_lb()
 
-        email_sent = False
-        if MAIL_OK:
-            to_list = list({d['p1email'].strip(), d['p2email'].strip()})
-            send_confirmation_async(to_list, d, reg_id, checkin_url)
-            email_sent = True
+        to_list = list({d['p1email'].strip(), d['p2email'].strip()})
+        send_confirmation_async(to_list, d, reg_id, checkin_url)
+        email_sent = True
 
         return jsonify({'success':True, 'reg_id':reg_id,
                         'checkin_url': checkin_url, 'email_sent':email_sent})
