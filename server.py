@@ -547,8 +547,14 @@ def api_register():
         # Auto-sync new registration to Leaderboard
         load_lb()
 
-        to_list = list({d['p1email'].strip(), d['p2email'].strip()})
-        email_sent = send_confirmation_sync(to_list, d, reg_id, checkin_url)
+        import re
+        email_pattern = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+        raw_emails = [d['p1email'].strip(), d['p2email'].strip()]
+        to_list = list(set([e for e in raw_emails if email_pattern.match(e)]))
+
+        email_sent = False
+        if to_list:
+            email_sent = send_confirmation_sync(to_list, d, reg_id, checkin_url)
 
         return jsonify({'success':True, 'reg_id':reg_id,
                         'checkin_url': checkin_url, 'email_sent':email_sent})

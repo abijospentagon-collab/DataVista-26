@@ -601,8 +601,13 @@
             }
         }
         const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRe.test(data.p1email) || !emailRe.test(data.p2email)) {
-            errText.textContent = 'Please enter valid email addresses.';
+        if (!emailRe.test(data.p1email)) {
+            errText.textContent = 'Please enter a valid email address for Participant 1 (e.g. name@gmail.com).';
+            errBox.classList.add('show');
+            return;
+        }
+        if (!emailRe.test(data.p2email)) {
+            errText.textContent = 'Please enter a valid email address for Participant 2 (e.g. name@gmail.com).';
             errBox.classList.add('show');
             return;
         }
