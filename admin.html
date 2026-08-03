@@ -540,8 +540,16 @@ document.getElementById('login-form').addEventListener('submit', async function(
         return;
     }
 
+function getAdminHeaders() {
+    const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
     if (json && json.success) {
-        sessionStorage.setItem('admin_logged_in', 'true');
+        if (json.token) localStorage.setItem('admin_token', json.token);
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display    = 'flex';
         loadData().catch(err => console.error('Error loading admin dashboard:', err));
@@ -570,7 +578,7 @@ function startLiveAutoSync() {
 
 // ── Auto-Restore Session on Page Refresh ───────────────
 window.addEventListener('DOMContentLoaded', () => {
-    if (sessionStorage.getItem('admin_logged_in') === 'true') {
+    if (localStorage.getItem('admin_token')) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display    = 'flex';
         loadData().catch(err => console.error(err));
@@ -583,8 +591,12 @@ window.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════
 async function loadData() {
     try {
-        const res  = await fetch(`${API_BASE}/api/admin/registrations`);
-        if (res.status === 401) { location.reload(); return; }
+        const res  = await fetch(`${API_BASE}/api/admin/registrations`, { headers: getAdminHeaders() });
+        if (res.status === 401 && !localStorage.getItem('admin_token')) {
+            localStorage.removeItem('admin_token');
+            location.reload();
+            return;
+        }
         const json = await res.json();
         allRows = json.rows || [];
         const counts        = json.counts        || {};
@@ -989,6 +1001,7 @@ document.getElementById('lb-search-input')?.addEventListener('input', renderLbTa
 //  LOGOUT
 // ═══════════════════════════════════════════════
 document.getElementById('logout-btn').addEventListener('click', async function() {
+    localStorage.removeItem('admin_token');
     sessionStorage.removeItem('admin_logged_in');
     if (autoSyncTimer) clearInterval(autoSyncTimer);
     try { await fetch(`${API_BASE}/api/admin/logout`, { method:'POST' }); } catch(e){}

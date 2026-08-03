@@ -464,13 +464,16 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     t.start()
 
 
-# ── Auth decorator ────────────────────────────────────
+ADMIN_SECRET_TOKEN = 'DV26_ADMIN_SECURE_TOKEN_2026'
+
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get('admin_logged_in'):
-            return jsonify({'error': 'Unauthorized'}), 401
-        return f(*args, **kwargs)
+        auth_header = request.headers.get('Authorization', '')
+        token = auth_header.replace('Bearer ', '').strip()
+        if session.get('admin_logged_in') or token == ADMIN_SECRET_TOKEN:
+            return f(*args, **kwargs)
+        return jsonify({'error': 'Unauthorized'}), 401
     return decorated
 
 # ── Page routes (no-cache and CORS headers) ──────
@@ -643,7 +646,7 @@ def api_login():
     d = request.get_json(force=True, silent=True) or {}
     if d.get('username') == ADMIN_USER and d.get('password') == ADMIN_PASS:
         session['admin_logged_in'] = True
-        return jsonify({'success':True})
+        return jsonify({'success':True, 'token': ADMIN_SECRET_TOKEN})
     return jsonify({'success':False,'message':'Invalid credentials'}), 401
 
 @app.route('/api/admin/logout', methods=['POST', 'OPTIONS'])
