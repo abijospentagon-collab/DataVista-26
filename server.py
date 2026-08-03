@@ -418,7 +418,7 @@ def build_confirmation_email(d, reg_id, checkin_url):
 </body></html>"""
 
 
-def send_confirmation_async(to_emails, d, reg_id, checkin_url):
+def send_confirmation_async(to_emails, d, reg_id):
     def _worker():
         try:
             url = 'https://api.emailjs.com/api/v1.0/email/send'
@@ -447,8 +447,7 @@ def send_confirmation_async(to_emails, d, reg_id, checkin_url):
                         'college': d.get('college', ''),
                         'department': d.get('department', ''),
                         'phone': d.get('phone', ''),
-                        'checkin_url': checkin_url,
-                        'message': f"Registration ID: {reg_id}\nEvent: {d.get('event','')}\nCollege: {d.get('college','')}\nCheck-In Link: {checkin_url}"
+                        'message': f"Registration ID: {reg_id}\nEvent: {d.get('event','')}\nCollege: {d.get('college','')}"
                     }
                 }
                 req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
@@ -633,11 +632,10 @@ def api_register():
 
         email_sent = False
         if to_list:
-            send_confirmation_async(to_list, d, reg_id, checkin_url)
+            send_confirmation_async(to_list, d, reg_id)
             email_sent = True
 
-        return jsonify({'success':True, 'reg_id':reg_id,
-                        'checkin_url': checkin_url, 'email_sent':email_sent})
+        return jsonify({'success':True, 'reg_id':reg_id, 'email_sent':email_sent})
     except Exception as e:
         return jsonify({'success':False,'error':str(e)}), 500
 

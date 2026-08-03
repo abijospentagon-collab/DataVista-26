@@ -651,8 +651,7 @@
                     `🎓 *Department:* ${data.department}\n` +
                     `👤 *Participant 1:* ${data.p1name}\n` +
                     `👤 *Participant 2:* ${data.p2name}\n\n` +
-                    `🔗 *Check-In Link:* ${json.checkin_url || ''}\n\n` +
-                    `Please show this Registration Pass at the entrance desk for event attendance.`
+                    `Please show this Registration ID Pass at the entrance desk for event attendance.`
                 );
                 document.getElementById('btn-wa-pass').href = `https://api.whatsapp.com/send?text=${waText}`;
 
