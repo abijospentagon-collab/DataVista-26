@@ -718,7 +718,10 @@ async function deleteRegistration(btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res  = await fetch(`${API_BASE}/api/admin/registrations/${encodeURIComponent(regId)}`, { method: 'DELETE' });
+        const res  = await fetch(`${API_BASE}/api/admin/registrations/${encodeURIComponent(regId)}`, {
+            method: 'DELETE',
+            headers: getAdminHeaders()
+        });
         const json = await res.json();
         if (json.success) {
             const tr = btnEl.closest('tr');

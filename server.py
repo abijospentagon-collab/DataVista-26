@@ -531,6 +531,21 @@ def db_update_checkin(reg_id, status_val, checkin_time_str):
         print('  [DB Error] db_update_checkin:', e)
         return None
 
+def db_delete_registration(reg_id):
+    url = f"{SUPABASE_URL}/rest/v1/registrations?reg_id=eq.{urllib.parse.quote(reg_id)}"
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json'
+    }
+    req = urllib.request.Request(url, headers=headers, method='DELETE')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return True
+    except Exception as e:
+        print('  [DB Error] db_delete_registration:', e)
+        return False
+
 # ── Page routes (no-cache and CORS headers) ──────
 from flask import make_response
 
@@ -822,22 +837,30 @@ def api_download():
     return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True, download_name='DataVista26_Registrations.xlsx')
 
-@app.route('/api/admin/registrations/<reg_id>', methods=['DELETE'])
+@app.route('/api/admin/registrations/<reg_id>', methods=['DELETE', 'OPTIONS'])
 @admin_required
 def api_delete_registration(reg_id):
-    """Delete a registration by Reg. ID and renumber S.No."""
+    """Delete a registration by Reg. ID from Supabase and Excel."""
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     try:
-        wb = openpyxl.load_workbook(EXCEL_PATH)
-        ws = wb.active
-        row_idx, vals = find_row_by_reg_id(ws, reg_id)
-        if row_idx is None:
-            return jsonify({'success': False, 'error': 'Registration not found'}), 404
-        ws.delete_rows(row_idx)
-        # Renumber S.No for rows below the deleted one
-        for r in range(2, ws.max_row + 1):
-            if any(ws.cell(r, c).value for c in range(2, ws.max_column + 1)):
-                ws.cell(r, 1).value = r - 1
-        wb.save(EXCEL_PATH)
+        # Delete from Supabase Cloud Database
+        db_delete_registration(reg_id)
+
+        # Delete from local Excel file
+        try:
+            wb = openpyxl.load_workbook(EXCEL_PATH)
+            ws = wb.active
+            row_idx, vals = find_row_by_reg_id(ws, reg_id)
+            if row_idx is not None:
+                ws.delete_rows(row_idx)
+                for r in range(2, ws.max_row + 1):
+                    if any(ws.cell(r, c).value for c in range(2, ws.max_column + 1)):
+                        ws.cell(r, 1).value = r - 1
+                wb.save(EXCEL_PATH)
+        except Exception as ex:
+            print('Excel delete warn:', ex)
+
         # Auto-prune from Leaderboard
         load_lb()
         print(f'  [ADMIN] Deleted registration: {reg_id}')
