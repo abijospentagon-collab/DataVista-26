@@ -308,6 +308,9 @@
             <span style="color:rgba(245,236,215,.3);font-family:Inter;font-size:.82rem;font-weight:400">Admin</span>
         </div>
         <div class="dash-right">
+            <span id="auto-sync-badge" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#4ADE80;font-size:0.75rem;font-weight:700;">
+                <span style="width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 10px #4ADE80;"></span> LIVE AUTO-SYNC (5s)
+            </span>
             <a href="/leaderboard" target="_blank" class="btn-dl" style="background:rgba(212,168,67,.12);color:var(--gold-light);border:1px solid var(--border)">
                 <i class="fas fa-external-link-alt"></i> Live Board
             </a>
@@ -538,14 +541,40 @@ document.getElementById('login-form').addEventListener('submit', async function(
     }
 
     if (json && json.success) {
+        sessionStorage.setItem('admin_logged_in', 'true');
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display    = 'flex';
         loadData().catch(err => console.error('Error loading admin dashboard:', err));
+        startLiveAutoSync();
     } else {
         document.getElementById('login-error-text').textContent = (json && json.message) || 'Invalid credentials.';
         errBox.classList.add('show');
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+    }
+});
+
+// ── Live Auto-Sync Loop (5 Seconds) ────────────────────
+let autoSyncTimer = null;
+function startLiveAutoSync() {
+    if (autoSyncTimer) clearInterval(autoSyncTimer);
+    autoSyncTimer = setInterval(() => {
+        const activeTab = document.querySelector('.dash-tab.active')?.id;
+        if (activeTab === 'tab-lb') {
+            loadLb();
+        } else {
+            loadData();
+        }
+    }, 5000);
+}
+
+// ── Auto-Restore Session on Page Refresh ───────────────
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('admin_logged_in') === 'true') {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display    = 'flex';
+        loadData().catch(err => console.error(err));
+        startLiveAutoSync();
     }
 });
 
@@ -960,7 +989,9 @@ document.getElementById('lb-search-input')?.addEventListener('input', renderLbTa
 //  LOGOUT
 // ═══════════════════════════════════════════════
 document.getElementById('logout-btn').addEventListener('click', async function() {
-    await fetch('/api/admin/logout', { method:'POST' });
+    sessionStorage.removeItem('admin_logged_in');
+    if (autoSyncTimer) clearInterval(autoSyncTimer);
+    try { await fetch(`${API_BASE}/api/admin/logout`, { method:'POST' }); } catch(e){}
     location.reload();
 });
 </script>
