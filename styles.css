@@ -2005,15 +2005,250 @@ body {
     .schedule-badge { margin-left: 0; }
 }
 
-@media (max-width: 480px) {
-    .nav-container { padding: 0.75rem 1rem; }
-    .container { padding: 0 1rem; }
-    .hero-actions { flex-direction: column; align-items: center; }
-    .download-button, .cta-button { width: 100%; justify-content: center; }
-    .countdown-info { flex-direction: column; align-items: center; gap: 0.75rem; }
-    .hero-meta { flex-direction: column; gap: 0.5rem; }
-    .meta-divider { display: none; }
-    .faculty-grid { grid-template-columns: 1fr; }
-    .student-grid { grid-template-columns: repeat(2, 1fr); }
+/* ═══════════════════════════════════════
+   OFFICIAL REGISTRATION TICKET DESIGN
+   (Matches User Image 100%)
+═══════════════════════════════════════ */
+.ticket-card-printable {
+    width: 100%;
+    max-width: 540px;
+    margin: 1.5rem auto;
+    background: #18020A;
+    border: 2px solid #D4A843;
+    border-radius: 18px;
+    overflow: hidden;
+    color: #F5ECD7;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    text-align: center;
+}
+
+.ticket-header {
+    background: #3B0617;
+    padding: 1.6rem 1rem;
+    border-bottom: 2px solid #D4A843;
+}
+
+.ticket-sub {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #D4A843;
+    text-transform: uppercase;
+}
+
+.ticket-title {
+    font-family: 'Orbitron', 'Cinzel', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: #F5ECD7;
+    margin: 0.35rem 0;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 15px rgba(212,168,67,0.4);
+}
+
+.ticket-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: rgba(245,236,215,0.7);
+    text-transform: uppercase;
+}
+
+.ticket-body {
+    padding: 1.75rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ticket-circle {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #D4A843;
+    color: #18020A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 900;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 0 25px rgba(212,168,67,0.45);
+}
+
+.ticket-conf-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #D4A843;
+    margin-bottom: 0.3rem;
+}
+
+.ticket-conf-sub {
+    font-size: 0.82rem;
+    color: rgba(245,236,215,0.75);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+.ticket-id-box {
+    width: 100%;
+    border: 2px solid #D4A843;
+    border-radius: 14px;
+    padding: 1.1rem 1rem;
+    background: rgba(212,168,67,0.05);
+    margin-bottom: 1.25rem;
+}
+
+.t-box-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #D4A843;
+    text-transform: uppercase;
+}
+
+.t-box-id {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #F5ECD7;
+    letter-spacing: 0.12em;
+    margin: 0.4rem 0;
+}
+
+.t-box-sub {
+    font-size: 0.72rem;
+    color: rgba(245,236,215,0.6);
+}
+
+.t-attn-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: #D4A843;
+    margin-bottom: 0.4rem;
+}
+
+.ticket-attn-box {
+    width: 100%;
+    border: 2px dashed #D4A843;
+    border-radius: 14px;
+    padding: 1.1rem 1rem;
+    background: rgba(212,168,67,0.03);
+    margin-bottom: 1.5rem;
+}
+
+.ticket-sec-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #D4A843;
+    align-self: flex-start;
+    margin-bottom: 0.6rem;
+}
+
+.ticket-details-table {
+    width: 100%;
+    background: #280512;
+    border: 1px solid rgba(212,168,67,0.25);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.t-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid rgba(212,168,67,0.1);
+    font-size: 0.82rem;
+}
+
+.t-row:last-child {
+    border-bottom: none;
+}
+
+.t-key {
+    color: rgba(245,236,215,0.6);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.t-val {
+    color: #F5ECD7;
+    font-weight: 700;
+    text-align: right;
+}
+
+.ticket-meta-box {
+    width: 100%;
+    background: rgba(212,168,67,0.06);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    text-align: left;
+    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-reminders {
+    width: 100%;
+    text-align: left;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    border-top: 1px solid rgba(212,168,67,0.2);
+}
+
+.t-rem-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #D4A843;
+    margin-bottom: 0.6rem;
+}
+
+.ticket-reminders ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    font-size: 0.78rem;
+    color: rgba(245,236,215,0.75);
+    line-height: 1.6;
+}
+
+.ticket-footer {
+    background: #100106;
+    padding: 1rem;
+    font-size: 0.72rem;
+    color: rgba(245,236,215,0.5);
+    border-top: 1px solid rgba(212,168,67,0.2);
+    line-height: 1.5;
+}
+
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    #official-ticket-card, #official-ticket-card * {
+        visibility: visible !important;
+    }
+    #official-ticket-card {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 }
 

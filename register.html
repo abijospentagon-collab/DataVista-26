@@ -383,47 +383,87 @@
             <!-- ── Success screen ── -->
             <div class="success-screen" id="success-screen">
 
-                <div class="success-icon"><i class="fas fa-check"></i></div>
-                <h2>Registration Confirmed!</h2>
-                <p>Your team is all set for <strong style="color:var(--gold-light)">DATA VISTA '26</strong>.<br>31st August 2026 &bull; Anderson Hall, MCC.</p>
-
-                <!-- Registration ID Card -->
-                <div class="reg-id-box" style="position:relative;overflow:hidden;background:linear-gradient(135deg, rgba(212,168,67,0.12), rgba(15,2,9,0.9));border:2px solid var(--gold);box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(212,168,67,0.2);padding-bottom:0.5rem;margin-bottom:0.75rem;">
-                        <div class="reg-id-label" style="margin:0"><i class="fas fa-ticket-alt"></i> &nbsp;OFFICIAL EVENT PASS</div>
-                        <span style="font-size:0.7rem;color:var(--gold-light);background:rgba(212,168,67,0.2);padding:2px 8px;border-radius:100px;font-weight:700">DATA VISTA '26</span>
+                <!-- ══ OFFICIAL PRINTABLE TICKET CARD (MATCHES USER IMAGE 100%) ══ -->
+                <div id="official-ticket-card" class="ticket-card-printable">
+                    <!-- Header Banner -->
+                    <div class="ticket-header">
+                        <div class="ticket-sub">DEPARTMENT OF DATA SCIENCE - MADRAS CHRISTIAN COLLEGE</div>
+                        <h1 class="ticket-title">DATA VISTA '26</h1>
+                        <div class="ticket-tag">INTERCOLLEGIATE TECH FEST</div>
                     </div>
-                    <div class="reg-id-row">
-                        <span class="reg-id-value" id="reg-id-val">—</span>
-                        <button class="btn-copy" id="copy-btn" onclick="copyRegId()">
-                            <i class="fas fa-copy"></i> Copy ID
-                        </button>
+
+                    <!-- Ticket Body -->
+                    <div class="ticket-body">
+                        <!-- Checkmark Circle -->
+                        <div class="ticket-circle"><i class="fas fa-check"></i></div>
+                        <h2 class="ticket-conf-title">Registration Confirmed!</h2>
+                        <p class="ticket-conf-sub">Your participation has been successfully registered.<br>We look forward to seeing you on <strong>31st August 2026!</strong></p>
+
+                        <!-- Your Registration ID Box -->
+                        <div class="ticket-id-box">
+                            <div class="t-box-label">YOUR REGISTRATION ID</div>
+                            <div class="t-box-id" id="reg-id-val">—</div>
+                            <div class="t-box-sub">📌 Keep this safe — present it at check in</div>
+                        </div>
+
+                        <!-- Your Attendance ID Box -->
+                        <div class="t-attn-label">📌 SHOW THIS AT THE REGISTRATION DESK</div>
+                        <div class="ticket-attn-box">
+                            <div class="t-box-label">YOUR ATTENDANCE ID</div>
+                            <div class="t-box-id" id="reg-attn-val">—</div>
+                            <div class="t-box-sub">📍 Present this ID to the registration team on event day</div>
+                        </div>
+
+                        <!-- Registration Details Section -->
+                        <div class="ticket-sec-title">REGISTRATION DETAILS</div>
+                        <div class="ticket-details-table">
+                            <div class="t-row"><span class="t-key">EVENT</span><span class="t-val" id="t-val-event">—</span></div>
+                            <div class="t-row"><span class="t-key">COLLEGE</span><span class="t-val" id="t-val-college">—</span></div>
+                            <div class="t-row"><span class="t-key">DEPARTMENT</span><span class="t-val" id="t-val-dept">—</span></div>
+                            <div class="t-row"><span class="t-key">PARTICIPANT 1</span><span class="t-val" id="t-val-p1">—</span></div>
+                            <div class="t-row"><span class="t-key">PARTICIPANT 2</span><span class="t-val" id="t-val-p2">—</span></div>
+                            <div class="t-row"><span class="t-key">PHONE</span><span class="t-val" id="t-val-phone">—</span></div>
+                            <div class="t-row"><span class="t-key">REGISTERED ON</span><span class="t-val" id="t-val-date">—</span></div>
+                        </div>
+
+                        <!-- Event Meta Info -->
+                        <div class="ticket-meta-box">
+                            <div>📅 <strong>Date:</strong> 31st August 2026</div>
+                            <div>📍 <strong>Venue:</strong> Anderson Hall, Madras Christian College, Chennai</div>
+                            <div>⏰ <strong>Report By:</strong> 9:00 AM</div>
+                        </div>
+
+                        <!-- Important Reminders -->
+                        <div class="ticket-reminders">
+                            <div class="t-rem-title">IMPORTANT REMINDERS</div>
+                            <ul>
+                                <li>Only <strong>1 team per department</strong> is allowed per event.</li>
+                                <li>Bring your valid <strong>College ID card</strong> on the event day.</li>
+                                <li>Show this pass's <strong>Registration ID</strong> at check-in for attendance marking.</li>
+                                <li>Adhere to all event rules as per the official rule book.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Footer -->
+                    <div class="ticket-footer">
+                        Organized by <strong>DATONICS</strong> — Department of Data Science Association<br>
+                        Madras Christian College (Autonomous), Chennai
                     </div>
                 </div>
 
-                <!-- Zero-Email Actions: WhatsApp & PDF Download -->
-                <div style="width:100%;display:flex;flex-direction:column;gap:0.65rem;margin-top:0.5rem;">
+                <!-- Actions: WhatsApp & PDF Download -->
+                <div style="width:100%;display:flex;flex-direction:column;gap:0.65rem;margin-top:0.8rem;">
+                    <button onclick="window.print()" class="btn-back" style="justify-content:center;background:linear-gradient(135deg, var(--gold), var(--gold-dark));color:#0F0209;border:none;font-weight:800;box-shadow:0 4px 15px rgba(212,168,67,0.3);">
+                        <i class="fas fa-file-pdf"></i> 📥 Download / Print Official Ticket (PDF)
+                    </button>
                     <a id="btn-wa-pass" href="#" target="_blank" class="btn-back" style="background:linear-gradient(135deg, #25D366, #128C7E);color:#FFFFFF;border:none;font-weight:800;justify-content:center;box-shadow:0 4px 15px rgba(37,211,102,0.3);">
                         <i class="fab fa-whatsapp" style="font-size:1.1rem"></i> 💬 Save / Share Pass to WhatsApp
                     </a>
-                    <button onclick="window.print()" class="btn-back" style="justify-content:center;background:rgba(212,168,67,0.12);border-color:var(--gold);color:var(--gold-light);font-weight:700;">
-                        <i class="fas fa-file-pdf"></i> 📥 Download / Print Official Ticket (PDF)
-                    </button>
                 </div>
-
-                <!-- Show at desk note -->
-                <div style="margin:.4rem 0;padding:.75rem 1.1rem;
-                    background:rgba(212,168,67,0.07);border:1px solid rgba(212,168,67,0.2);
-                    border-radius:10px;text-align:center;font-size:.82rem;color:var(--text-muted);">
-                    <i class="fas fa-qrcode" style="color:var(--gold-light);margin-right:6px"></i>
-                    Show this <strong style="color:var(--gold-light)">Registration ID Pass</strong> at the entrance desk for check-in
-                </div>
-
-                <!-- Summary -->
-                <div class="success-details" id="success-details"></div>
 
                 <!-- Actions -->
-                <div class="success-actions">
+                <div class="success-actions" style="margin-top:1rem">
                     <a href="/" class="btn-back"><i class="fas fa-home"></i> Main Site</a>
                     <button class="btn-back" onclick="location.reload()">
                         <i class="fas fa-plus"></i> Register Another Team
@@ -638,9 +678,19 @@
                 document.getElementById('form-screen').style.display = 'none';
                 document.getElementById('success-screen').classList.add('show');
 
-                // ── Registration ID & 1-Click WhatsApp Event Pass ──
+                // ── Registration ID & Ticket Details ──
                 const regId = json.reg_id || '';
-                document.getElementById('reg-id-val').textContent = regId;
+                document.getElementById('reg-id-val').textContent   = regId;
+                document.getElementById('reg-attn-val').textContent = regId;
+
+                const nowStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('t-val-event').textContent   = eventName;
+                document.getElementById('t-val-college').textContent = data.college;
+                document.getElementById('t-val-dept').textContent    = data.department;
+                document.getElementById('t-val-p1').textContent      = data.p1name;
+                document.getElementById('t-val-p2').textContent      = data.p2name;
+                document.getElementById('t-val-phone').textContent   = data.phone;
+                document.getElementById('t-val-date').textContent    = nowStr;
 
                 const waText = encodeURIComponent(
                     `🎉 *DATA VISTA '26 — Official Event Registration Pass*\n` +
@@ -655,21 +705,6 @@
                     `Please show this Registration Pass at the entrance desk for event attendance.`
                 );
                 document.getElementById('btn-wa-pass').href = `https://api.whatsapp.com/send?text=${waText}`;
-
-                // ── Summary table ──
-                const details = [
-                    ['Event',         eventName],
-                    ['College',       data.college],
-                    ['Department',    data.department],
-                    ['Participant 1', data.p1name],
-                    ['Participant 2', data.p2name],
-                    ['Phone',         data.phone]
-                ];
-                if (data.additionalInfo) details.push([meta.extraLabel || 'Extra', data.additionalInfo]);
-                document.getElementById('success-details').innerHTML =
-                    details.map(([k, v]) =>
-                        `<div class="row"><span class="key">${k}</span><span class="val">${v}</span></div>`
-                    ).join('');
             } else {
                 errText.textContent = json.error || 'Registration failed. Please try again.';
                 errBox.classList.add('show');
