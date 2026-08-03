@@ -506,6 +506,15 @@ function switchTab(tab) {
     if (tab === 'lb') loadLb();
 }
 
+// ── Helper: Admin Auth Headers ─────────────────────────
+function getAdminHeaders() {
+    const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
 // ═══════════════════════════════════════════════
 //  LOGIN
 // ═══════════════════════════════════════════════
@@ -539,14 +548,6 @@ document.getElementById('login-form').addEventListener('submit', async function(
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         return;
     }
-
-function getAdminHeaders() {
-    const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
-}
 
     if (json && json.success) {
         if (json.token) localStorage.setItem('admin_token', json.token);
