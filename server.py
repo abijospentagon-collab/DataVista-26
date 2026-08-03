@@ -476,6 +476,62 @@ def admin_required(f):
         return jsonify({'error': 'Unauthorized'}), 401
     return decorated
 
+# ── Supabase Persistent Cloud Database Config ──────────
+SUPABASE_URL = 'https://dkylhswboedbxttfpkzo.supabase.co'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRreWxoc3dib2VkYnh0dF...0.1ziUobZ4kYucdJqJ6oGva-CcCCnq7I9-bvreJ59HkjE'
+SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRreWxoc3dib2VkYnh0dGZwa3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Njk3NjAsImV4cCI6MjEwMTM0NTc2MH0.1ziUobZ4kYucdJqJ6oGva-CcCCnq7I9-bvreJ59HkjE'
+
+import urllib.request
+import urllib.parse
+
+def db_get_registrations():
+    url = f"{SUPABASE_URL}/rest/v1/registrations?select=*&order=id.asc"
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json'
+    }
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        print('  [DB Error] db_get_registrations:', e)
+        return []
+
+def db_insert_registration(payload):
+    url = f"{SUPABASE_URL}/rest/v1/registrations"
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+    }
+    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        print('  [DB Error] db_insert_registration:', e)
+        return None
+
+def db_update_checkin(reg_id, status_val, checkin_time_str):
+    url = f"{SUPABASE_URL}/rest/v1/registrations?reg_id=eq.{urllib.parse.quote(reg_id)}"
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+    }
+    payload = {'status': status_val, 'checkin_time': checkin_time_str}
+    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method='PATCH')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        print('  [DB Error] db_update_checkin:', e)
+        return None
+
 # ── Page routes (no-cache and CORS headers) ──────
 from flask import make_response
 
@@ -539,6 +595,21 @@ def api_register():
         ws  = wb.active
         sno = ws.max_row
 
+        # Insert into Supabase Cloud Database (Permanent)
+        db_insert_registration({
+            'reg_id': reg_id,
+            'event': d['event'].strip(),
+            'college': d['college'].strip(),
+            'department': d['department'].strip(),
+            'p1name': d['p1name'].strip(),
+            'p1email': d['p1email'].strip(),
+            'p2name': d['p2name'].strip(),
+            'p2email': d['p2email'].strip(),
+            'phone': d['phone'].strip(),
+            'status': 'Pending',
+            'checkin_time': ''
+        })
+
         ws.append([
             sno, reg_id,
             d['event'].strip(), d['college'].strip(), d['department'].strip(),
@@ -549,7 +620,8 @@ def api_register():
             'Pending', ''
         ])
         style_data_row(ws, ws.max_row)
-        wb.save(EXCEL_PATH)
+        try: wb.save(EXCEL_PATH)
+        except Exception as ex: print('Excel save warn:', ex)
 
         # Auto-sync new registration to Leaderboard
         load_lb()
@@ -573,6 +645,23 @@ def api_register():
 @app.route('/api/checkin/<reg_id>')
 def api_checkin_get(reg_id):
     """Return registration details for the check-in page."""
+    db_rows = db_get_registrations()
+    match = next((r for r in db_rows if r.get('reg_id') == reg_id), None)
+    if match:
+        return jsonify({
+            'found':      True,
+            'reg_id':     reg_id,
+            'event':      match.get('event', ''),
+            'college':    match.get('college', ''),
+            'department': match.get('department', ''),
+            'p1name':     match.get('p1name', ''),
+            'p2name':     match.get('p2name', ''),
+            'phone':      match.get('phone', ''),
+            'status':     match.get('status', 'Pending'),
+            'checkin_at': match.get('checkin_time', '')
+        })
+
+    # Fallback to local Excel file
     wb = openpyxl.load_workbook(EXCEL_PATH)
     ws = wb.active
     row_idx, vals = find_row_by_reg_id(ws, reg_id)
@@ -604,29 +693,27 @@ def api_checkin_get(reg_id):
 @app.route('/api/checkin/<reg_id>/mark', methods=['POST'])
 def api_checkin_mark(reg_id):
     """Mark a participant as checked in."""
-    wb = openpyxl.load_workbook(EXCEL_PATH)
-    ws = wb.active
-    row_idx, vals = find_row_by_reg_id(ws, reg_id)
-    if row_idx is None:
-        return jsonify({'success':False,'error':'Registration not found'}), 404
-
-    headers  = [c.value for c in ws[1]]
-    stat_col = headers.index('Check-In Status') + 1  # 1-based
-    time_col = headers.index('Check-In Time')   + 1
-
-    current = ws.cell(row=row_idx, column=stat_col).value
-    if current == 'Checked In':
-        chk_time = ws.cell(row=row_idx, column=time_col).value
-        return jsonify({'success':False, 'already':True,
-                        'checked_in_at': str(chk_time) if chk_time else ''})
-
     now_str = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-    ws.cell(row=row_idx, column=stat_col).value = 'Checked In'
-    ws.cell(row=row_idx, column=time_col).value  = now_str
-    # Style the status cell green
-    green = PatternFill('solid', fgColor='D4EDDA')
-    ws.cell(row=row_idx, column=stat_col).fill = green
-    wb.save(EXCEL_PATH)
+
+    # Update Supabase Cloud DB
+    db_update_checkin(reg_id, 'Checked In', now_str)
+
+    # Local Excel Fallback
+    try:
+        wb = openpyxl.load_workbook(EXCEL_PATH)
+        ws = wb.active
+        row_idx, vals = find_row_by_reg_id(ws, reg_id)
+        if row_idx is not None:
+            headers  = [c.value for c in ws[1]]
+            stat_col = headers.index('Check-In Status') + 1
+            time_col = headers.index('Check-In Time')   + 1
+            ws.cell(row=row_idx, column=stat_col).value = 'Checked In'
+            ws.cell(row=row_idx, column=time_col).value  = now_str
+            green = PatternFill('solid', fgColor='D4EDDA')
+            ws.cell(row=row_idx, column=stat_col).fill = green
+            wb.save(EXCEL_PATH)
+    except Exception as ex:
+        print('Excel checkin warn:', ex)
 
     print(f'  [CHECKIN] {reg_id} marked present at {now_str}')
     return jsonify({'success':True, 'checked_in_at': now_str})
@@ -660,28 +747,82 @@ def api_logout():
 @app.route('/api/admin/registrations')
 @admin_required
 def api_registrations():
-    wb = openpyxl.load_workbook(EXCEL_PATH)
-    ws = wb.active
-    headers = [c.value for c in ws[1]]
+    headers = ['S.No', 'Reg. ID', 'Event', 'College', 'Department', 'Participant 1 Name', 'Participant 1 Email', 'Participant 2 Name', 'Participant 2 Email', 'Phone', 'Registered On', 'Check-In Status', 'Check-In Time']
     rows, counts, checkin_counts = [], {}, {}
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        if any(v is not None for v in row):
-            rl = [str(v) if v is not None else '' for v in row]
+
+    db_rows = db_get_registrations()
+    if db_rows:
+        for idx, r in enumerate(db_rows, start=1):
+            created_str = r.get('created_at', '')
+            if created_str and 'T' in created_str:
+                created_str = created_str[:16].replace('T', ' ')
+            rl = [
+                str(idx),
+                r.get('reg_id', ''),
+                r.get('event', ''),
+                r.get('college', ''),
+                r.get('department', ''),
+                r.get('p1name', ''),
+                r.get('p1email', ''),
+                r.get('p2name', ''),
+                r.get('p2email', ''),
+                r.get('phone', ''),
+                created_str,
+                r.get('status', 'Pending'),
+                r.get('checkin_time', '')
+            ]
             rows.append(rl)
-            ev  = rl[IDX_EVENT]   if len(rl) > IDX_EVENT   else ''
-            st  = rl[IDX_STATUS]  if len(rl) > IDX_STATUS  else 'Pending'
-            counts[ev]        = counts.get(ev, 0) + 1
+            ev = r.get('event', '')
+            st = r.get('status', 'Pending')
+            counts[ev] = counts.get(ev, 0) + 1
             if st == 'Checked In':
                 checkin_counts[ev] = checkin_counts.get(ev, 0) + 1
+    else:
+        wb = openpyxl.load_workbook(EXCEL_PATH)
+        ws = wb.active
+        headers = [c.value for c in ws[1]]
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if any(v is not None for v in row):
+                rl = [str(v) if v is not None else '' for v in row]
+                rows.append(rl)
+                ev  = rl[IDX_EVENT]   if len(rl) > IDX_EVENT   else ''
+                st  = rl[IDX_STATUS]  if len(rl) > IDX_STATUS  else 'Pending'
+                counts[ev]        = counts.get(ev, 0) + 1
+                if st == 'Checked In':
+                    checkin_counts[ev] = checkin_counts.get(ev, 0) + 1
+
     return jsonify({'headers':headers,'rows':rows,'total':len(rows),
                     'counts':counts,'checkin_counts':checkin_counts})
 
 @app.route('/api/admin/download')
 @admin_required
 def api_download():
-    return send_from_directory(BASE_DIR,'registrations.xlsx',
-                               as_attachment=True,
-                               download_name='DataVista26_Registrations.xlsx')
+    import io
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Registrations'
+    headers = ['S.No', 'Reg. ID', 'Event', 'College', 'Department', 'Participant 1 Name', 'Participant 1 Email', 'Participant 2 Name', 'Participant 2 Email', 'Phone', 'Registered On', 'Check-In Status', 'Check-In Time']
+    ws.append(headers)
+    
+    db_rows = db_get_registrations()
+    if db_rows:
+        for idx, r in enumerate(db_rows, start=1):
+            created_str = r.get('created_at', '')
+            if created_str and 'T' in created_str:
+                created_str = created_str[:16].replace('T', ' ')
+            ws.append([
+                idx, r.get('reg_id',''), r.get('event',''), r.get('college',''),
+                r.get('department',''), r.get('p1name',''), r.get('p1email',''),
+                r.get('p2name',''), r.get('p2email',''), r.get('phone',''),
+                created_str, r.get('status','Pending'), r.get('checkin_time','')
+            ])
+            style_data_row(ws, ws.max_row)
+    
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     as_attachment=True, download_name='DataVista26_Registrations.xlsx')
 
 @app.route('/api/admin/registrations/<reg_id>', methods=['DELETE'])
 @admin_required
