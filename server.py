@@ -489,6 +489,10 @@ def add_cors_and_cache_headers(response):
 def index():
     return send_from_directory(BASE_DIR, 'index.html')
 
+@app.route('/api/health')
+def health_check():
+    return jsonify({'status': 'ok', 'message': 'DataVista server is active'}), 200
+
 @app.route('/register')
 @app.route('/register.html')
 def register_page():
