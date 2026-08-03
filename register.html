@@ -401,13 +401,13 @@
                     </div>
                 </div>
 
-                <!-- 1-Click Email Pass & Print Actions -->
-                <div style="width:100%;display:flex;flex-direction:column;gap:0.6rem;margin-top:0.5rem;">
-                    <a id="btn-email-pass" href="#" target="_blank" class="btn-back" style="background:linear-gradient(135deg, var(--gold), var(--gold-dark));color:#0F0209;border:none;font-weight:800;justify-content:center;box-shadow:0 4px 15px rgba(212,168,67,0.3);">
-                        <i class="fas fa-paper-plane"></i> 📩 Send Pass to My Email App
+                <!-- Zero-Email Actions: WhatsApp & PDF Download -->
+                <div style="width:100%;display:flex;flex-direction:column;gap:0.65rem;margin-top:0.5rem;">
+                    <a id="btn-wa-pass" href="#" target="_blank" class="btn-back" style="background:linear-gradient(135deg, #25D366, #128C7E);color:#FFFFFF;border:none;font-weight:800;justify-content:center;box-shadow:0 4px 15px rgba(37,211,102,0.3);">
+                        <i class="fab fa-whatsapp" style="font-size:1.1rem"></i> 💬 Save / Share Pass to WhatsApp
                     </a>
-                    <button onclick="window.print()" class="btn-back" style="justify-content:center;background:rgba(255,255,255,0.05);">
-                        <i class="fas fa-print"></i> 📄 Download / Print Pass (PDF)
+                    <button onclick="window.print()" class="btn-back" style="justify-content:center;background:rgba(212,168,67,0.12);border-color:var(--gold);color:var(--gold-light);font-weight:700;">
+                        <i class="fas fa-file-pdf"></i> 📥 Download / Print Official Ticket (PDF)
                     </button>
                 </div>
 
@@ -638,25 +638,23 @@
                 document.getElementById('form-screen').style.display = 'none';
                 document.getElementById('success-screen').classList.add('show');
 
-                // ── Registration ID & 1-Click Email Pass ──
+                // ── Registration ID & 1-Click WhatsApp Event Pass ──
                 const regId = json.reg_id || '';
                 document.getElementById('reg-id-val').textContent = regId;
 
-                const mailSubject = encodeURIComponent(`[DATA VISTA '26] Registration Pass — ${regId}`);
-                const mailBody = encodeURIComponent(
-                    `DATA VISTA '26 — Official Registration Pass\n` +
-                    `==========================================\n\n` +
-                    `Registration ID: ${regId}\n` +
-                    `Event: ${eventName}\n` +
-                    `College: ${data.college}\n` +
-                    `Department: ${data.department}\n` +
-                    `Participant 1: ${data.p1name} (${data.p1email})\n` +
-                    `Participant 2: ${data.p2name} (${data.p2email})\n` +
-                    `Check-In Link: ${json.checkin_url || ''}\n\n` +
-                    `Present this Registration Pass at the venue entrance desk for event attendance.`
+                const waText = encodeURIComponent(
+                    `🎉 *DATA VISTA '26 — Official Event Registration Pass*\n` +
+                    `========================================\n\n` +
+                    `🎟️ *Registration ID:* ${regId}\n` +
+                    `📌 *Event:* ${eventName}\n` +
+                    `🏫 *College:* ${data.college}\n` +
+                    `🎓 *Department:* ${data.department}\n` +
+                    `👤 *Participant 1:* ${data.p1name}\n` +
+                    `👤 *Participant 2:* ${data.p2name}\n\n` +
+                    `🔗 *Check-In Link:* ${json.checkin_url || ''}\n\n` +
+                    `Please show this Registration Pass at the entrance desk for event attendance.`
                 );
-                const recipients = [data.p1email, data.p2email].filter(Boolean).join(',');
-                document.getElementById('btn-email-pass').href = `mailto:${recipients}?subject=${mailSubject}&body=${mailBody}`;
+                document.getElementById('btn-wa-pass').href = `https://api.whatsapp.com/send?text=${waText}`;
 
                 // ── Summary table ──
                 const details = [
