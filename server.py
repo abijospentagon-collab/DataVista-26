@@ -421,41 +421,42 @@ def build_confirmation_email(d, reg_id, checkin_url):
 def send_confirmation_async(to_emails, d, reg_id, checkin_url):
     def _worker():
         try:
-            username = 'datavista2026@gmail.com'
-            password = 'rlie zhta ifed uvxn'
-            mail_from = f"DATA VISTA '26 <{username}>"
-
-            html = build_confirmation_email(d, reg_id, checkin_url)
-            text_body = (
-                f"DATA VISTA '26 — Registration Confirmed!\n\n"
-                f"Event: {d.get('event','')}\nRegistration ID: {reg_id}\n"
-                f"College: {d.get('college','')}\n"
-                f"Participant 1: {d.get('p1name','')}\n"
-                f"Participant 2: {d.get('p2name','')}\n\n"
-                f"Check-In Link: {checkin_url}"
-            )
-
-            # Standard Gmail SMTP (Port 465 SSL)
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=15) as smtp:
-                smtp.login(username, password)
-                for email in to_emails:
-                    email_clean = email.strip()
-                    if not email_clean: continue
-                    try:
-                        msg = MIMEMultipart('alternative')
-                        msg['Subject'] = f"[DATA VISTA '26] Registration Confirmed — {reg_id}"
-                        msg['From']    = mail_from
-                        msg['To']      = email_clean
-                        msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
-                        msg.attach(MIMEText(html, 'html', 'utf-8'))
-                        smtp.sendmail(username, [email_clean], msg.as_string())
-                        print(f'  [EMAIL] Gmail SMTP sent to {email_clean} ({reg_id})')
-                    except Exception as single_err:
-                        print(f'  [EMAIL] Failed to send to {email_clean}: {single_err}')
-
+            url = 'https://api.emailjs.com/api/v1.0/email/send'
+            headers = {
+                'Content-Type': 'application/json',
+                'Origin': 'https://datavista-26.onrender.com',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+            }
+            for email in to_emails:
+                email_clean = email.strip()
+                if not email_clean: continue
+                payload = {
+                    'service_id': 'service_ras66em',
+                    'template_id': 'template_00s7x05',
+                    'user_id': 'jPaO__3oPI2sybhNY',
+                    'template_params': {
+                        'to_email': email_clean,
+                        'email': email_clean,
+                        'user_email': email_clean,
+                        'p1email': d.get('p1email', ''),
+                        'p2email': d.get('p2email', ''),
+                        'p1name': d.get('p1name', ''),
+                        'p2name': d.get('p2name', ''),
+                        'reg_id': reg_id,
+                        'event': d.get('event', ''),
+                        'college': d.get('college', ''),
+                        'department': d.get('department', ''),
+                        'phone': d.get('phone', ''),
+                        'checkin_url': checkin_url,
+                        'message': f"Registration ID: {reg_id}\nEvent: {d.get('event','')}\nCollege: {d.get('college','')}\nCheck-In Link: {checkin_url}"
+                    }
+                }
+                req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers)
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    print(f'  [EMAIL] EmailJS HTTPS sent to {email_clean} (Status: {resp.status})')
         except Exception as err:
             import traceback
-            print(f'  [EMAIL] Gmail SMTP worker error: {err}')
+            print(f'  [EMAIL] EmailJS worker error: {err}')
             traceback.print_exc()
 
     t = threading.Thread(target=_worker)
