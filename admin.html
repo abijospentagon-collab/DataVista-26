@@ -20,10 +20,7 @@
         body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
         /* ─── LOGIN ─── */
-        #login-screen {
-            min-height:100vh; display:flex; align-items:center; justify-content:center;
-            background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(107,15,42,.6) 0%,transparent 70%),var(--bg);
-        }
+        #login-screen { display:none !important; }
         .login-card {
             width:100%; max-width:420px; padding:2.75rem 2.25rem;
             background:var(--card-bg); border:1px solid var(--border);
@@ -43,9 +40,10 @@
             background:var(--gold-grad); -webkit-background-clip:text;
             -webkit-text-fill-color:transparent; background-clip:text; text-align:center;
         }
-        .login-logo p { font-size:.78rem; color:var(--text-muted); }
-        .lf { display:flex; flex-direction:column; gap:6px; margin-bottom:1rem; }
-        .lf label { font-size:.75rem; font-weight:600; color:var(--gold-light); text-transform:uppercase; letter-spacing:.05em; }
+        .login-logo p { font-size:.78rem; color:var(--text-muted); text-align:center; }
+        .login-form { display:flex; flex-direction:column; gap:1.1rem; }
+        .lf { display:flex; flex-direction:column; gap:.4rem; }
+        .lf label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--gold-light); }
         .lf .iw { position:relative; }
         .lf .iw i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.85rem; }
         .lf input {
@@ -74,7 +72,7 @@
         .login-error.show { display:flex; }
 
         /* ─── DASHBOARD ─── */
-        #dashboard { display:none; min-height:100vh; flex-direction:column; }
+        #dashboard { display:flex !important; min-height:100vh; flex-direction:column; }
 
         .dash-topbar {
             display:flex; align-items:center; justify-content:space-between;
