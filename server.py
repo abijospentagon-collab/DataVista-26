@@ -217,10 +217,16 @@ def sync_registrations_to_lb(lb_data):
             reg_on  = str(r.get('created_at', ''))[:16].replace('T', ' ') if r.get('created_at') else ''
             team    = f"{p1} & {p2}" if p2 else p1
 
+            db_score = 0
+            try: db_score = int(r.get('score', 0) or 0)
+            except: db_score = 0
+
             if reg_id in existing:
                 existing[reg_id]['event']   = event
                 existing[reg_id]['college'] = college
                 existing[reg_id]['team']    = team
+                if db_score != 0 or 'score' not in existing[reg_id]:
+                    existing[reg_id]['score'] = db_score
                 new_entries.append(existing[reg_id])
             else:
                 entry = {
@@ -229,7 +235,7 @@ def sync_registrations_to_lb(lb_data):
                     'event':     event,
                     'college':   college,
                     'team':      team,
-                    'score':     0,
+                    'score':     db_score,
                     'timestamp': reg_on or datetime.now().strftime('%d-%m-%Y %H:%M')
                 }
                 lb_data['next_id'] = lb_data.get('next_id', 1) + 1
@@ -526,6 +532,24 @@ def db_delete_registration(reg_id):
     except Exception as e:
         print('  [DB Error] db_delete_registration:', e)
         return False
+
+def db_update_score(reg_id, score_val):
+    if not reg_id: return None
+    url = f"{SUPABASE_URL}/rest/v1/registrations?reg_id=eq.{urllib.parse.quote(reg_id)}"
+    headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': f'Bearer {SUPABASE_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+    }
+    payload = {'score': int(score_val)}
+    req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method='PATCH')
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        print('  [DB Error] db_update_score:', e)
+        return None
 
 # ── Page routes (no-cache and CORS headers) ──────
 from flask import make_response
@@ -906,7 +930,10 @@ def api_lb_update(entry_id):
             if 'event' in d:   entry['event']   = d['event']
             if 'college' in d: entry['college'] = d['college']
             if 'team' in d:    entry['team']    = d['team']
-            if 'score' in d:   entry['score']   = int(d['score'])
+            if 'score' in d:
+                entry['score'] = int(d['score'])
+                if entry.get('reg_id'):
+                    db_update_score(entry['reg_id'], entry['score'])
             entry['timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M')
             save_lb(data)
             return jsonify({'success':True,'entry':entry})
