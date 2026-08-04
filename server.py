@@ -193,7 +193,7 @@ def find_row_by_reg_id(ws, reg_id):
 
 # ── Leaderboard helpers ───────────────────────────────
 def sync_registrations_to_lb(lb_data):
-    """Sync enrolled participants from Supabase (or Excel) into leaderboard.json."""
+    """Sync enrolled participants from Supabase into leaderboard.json."""
     if not isinstance(lb_data, dict):
         lb_data = {'entries': lb_data if isinstance(lb_data, list) else [], 'next_id': 1, 'last_updated': ''}
 
@@ -204,51 +204,50 @@ def sync_registrations_to_lb(lb_data):
 
     new_entries = []
 
-    # 1. Primary Sync from Supabase Cloud DB
-    db_rows = db_get_registrations()
-    if db_rows:
-        for r in db_rows:
-            reg_id  = str(r.get('reg_id', '')).strip()
-            if not reg_id: continue
-            event   = str(r.get('event', '')).strip()
-            college = str(r.get('college', '')).strip()
-            p1      = str(r.get('p1name', '')).strip()
-            p2      = str(r.get('p2name', '')).strip()
-            reg_on  = str(r.get('created_at', ''))[:16].replace('T', ' ') if r.get('created_at') else ''
-            team    = f"{p1} & {p2}" if p2 else p1
+    try:
+        db_rows = db_get_registrations()
+        if db_rows:
+            for r in db_rows:
+                reg_id  = str(r.get('reg_id', '')).strip()
+                if not reg_id: continue
+                event   = str(r.get('event', '')).strip()
+                college = str(r.get('college', '')).strip()
+                p1      = str(r.get('p1name', '')).strip()
+                p2      = str(r.get('p2name', '')).strip()
+                reg_on  = str(r.get('created_at', ''))[:16].replace('T', ' ') if r.get('created_at') else ''
+                team    = f"{p1} & {p2}" if p2 else p1
 
-            db_score = 0
-            try: db_score = int(r.get('score', 0) or 0)
-            except: db_score = 0
+                db_score = 0
+                try: db_score = int(r.get('score', 0) or 0)
+                except Exception: db_score = 0
 
-            if reg_id in existing:
-                existing[reg_id]['event']   = event
-                existing[reg_id]['college'] = college
-                existing[reg_id]['team']    = team
-                if db_score != 0 or 'score' not in existing[reg_id]:
-                    existing[reg_id]['score'] = db_score
-                new_entries.append(existing[reg_id])
-            else:
-                entry = {
-                    'id':        lb_data.get('next_id', 1),
-                    'reg_id':    reg_id,
-                    'event':     event,
-                    'college':   college,
-                    'team':      team,
-                    'score':     db_score,
-                    'timestamp': reg_on or datetime.now().strftime('%d-%m-%Y %H:%M')
-                }
-                lb_data['next_id'] = lb_data.get('next_id', 1) + 1
-                new_entries.append(entry)
+                if reg_id in existing:
+                    existing[reg_id]['event']   = event
+                    existing[reg_id]['college'] = college
+                    existing[reg_id]['team']    = team
+                    if db_score != 0 or 'score' not in existing[reg_id]:
+                        existing[reg_id]['score'] = db_score
+                    new_entries.append(existing[reg_id])
+                else:
+                    entry = {
+                        'id':        lb_data.get('next_id', 1),
+                        'reg_id':    reg_id,
+                        'event':     event,
+                        'college':   college,
+                        'team':      team,
+                        'score':     db_score,
+                        'timestamp': reg_on or datetime.now().strftime('%d-%m-%Y %H:%M')
+                    }
+                    lb_data['next_id'] = lb_data.get('next_id', 1) + 1
+                    new_entries.append(entry)
 
-        # Retain manual entries if any don't have reg_id
-        for entry in lb_data.get('entries', []):
-            if isinstance(entry, dict) and not entry.get('reg_id') and entry not in new_entries:
-                new_entries.append(entry)
+            for entry in lb_data.get('entries', []):
+                if isinstance(entry, dict) and not entry.get('reg_id') and entry not in new_entries:
+                    new_entries.append(entry)
 
-        lb_data['entries'] = new_entries
+            lb_data['entries'] = new_entries
     except Exception as e:
-        print(f"  [LB SYNC] Error: {e}")
+        print(f"  [LB SYNC Error]: {e}")
 
     return lb_data
 
