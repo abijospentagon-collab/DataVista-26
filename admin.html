@@ -561,7 +561,6 @@
 <script>
 const API_BASE = (function() {
     if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
-    if (window.location.hostname.includes('onrender.com')) return '';
     return 'https://datavista-26.onrender.com';
 })();
 
@@ -674,7 +673,8 @@ window.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════════════
 async function loadData() {
     try {
-        const res  = await fetch(`${API_BASE}/api/admin/registrations`, { headers: getAdminHeaders() });
+        const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
+        const res  = await fetch(`${API_BASE}/api/admin/registrations?token=${token}`, { headers: getAdminHeaders() });
         if (res.status === 401 && !localStorage.getItem('admin_token')) {
             localStorage.removeItem('admin_token');
             location.reload();
@@ -837,7 +837,8 @@ let editingLbId = null;
 
 async function loadLb() {
     try {
-        const res  = await fetch(`${API_BASE}/api/admin/leaderboard`, { headers: getAdminHeaders() });
+        const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
+        const res  = await fetch(`${API_BASE}/api/admin/leaderboard?token=${token}`, { headers: getAdminHeaders() });
         if (res.status === 401 && !localStorage.getItem('admin_token')) { location.reload(); return; }
         const json = await res.json();
         lbEntries  = json.entries || [];
