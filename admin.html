@@ -750,8 +750,8 @@ let editingLbId = null;
 
 async function loadLb() {
     try {
-        const res  = await fetch(`${API_BASE}/api/admin/leaderboard`);
-        if (res.status === 401) { location.reload(); return; }
+        const res  = await fetch(`${API_BASE}/api/admin/leaderboard`, { headers: getAdminHeaders() });
+        if (res.status === 401 && !localStorage.getItem('admin_token')) { location.reload(); return; }
         const json = await res.json();
         lbEntries  = json.entries || [];
         renderLbTable();
@@ -874,7 +874,7 @@ async function savePoints(id, btnEl) {
     try {
         const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAdminHeaders(),
             body: JSON.stringify({ score: scoreVal })
         });
         const json = await res.json();
@@ -912,7 +912,7 @@ async function saveFullLbEdit(id, btnEl) {
     try {
         const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAdminHeaders(),
             body: JSON.stringify({ event: ev, college, team, score })
         });
         const json = await res.json();
@@ -943,7 +943,10 @@ async function deleteLbEntry(id, btnEl) {
     btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
+            method: 'DELETE',
+            headers: getAdminHeaders()
+        });
         const json = await res.json();
         if (json.success) {
             lbEntries = lbEntries.filter(e => e.id !== id);
@@ -981,7 +984,7 @@ async function addManualEntry() {
     try {
         const res = await fetch(`${API_BASE}/api/admin/leaderboard/add`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAdminHeaders(),
             body: JSON.stringify({ event: ev, college, team, score })
         });
         const json = await res.json();

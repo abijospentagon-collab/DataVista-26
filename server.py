@@ -193,52 +193,36 @@ def find_row_by_reg_id(ws, reg_id):
 
 # ── Leaderboard helpers ───────────────────────────────
 def sync_registrations_to_lb(lb_data):
-    """Sync enrolled participants from registrations.xlsx into leaderboard.json."""
+    """Sync enrolled participants from Supabase (or Excel) into leaderboard.json."""
     if not isinstance(lb_data, dict):
         lb_data = {'entries': lb_data if isinstance(lb_data, list) else [], 'next_id': 1, 'last_updated': ''}
 
-    if not os.path.exists(EXCEL_PATH):
-        return lb_data
+    existing = {}
+    for entry in lb_data.get('entries', []):
+        if isinstance(entry, dict) and entry.get('reg_id'):
+            existing[entry['reg_id']] = entry
 
-    try:
-        wb = openpyxl.load_workbook(EXCEL_PATH)
-        ws = wb.active
+    new_entries = []
 
-        existing = {}
-        for entry in lb_data.get('entries', []):
-            if isinstance(entry, dict) and 'reg_id' in entry and entry['reg_id']:
-                existing[entry['reg_id']] = entry
-
-        new_entries = []
-        excel_changed = False
-
-        for row_idx in range(2, ws.max_row + 1):
-            if not any(ws.cell(row_idx, c).value for c in range(1, ws.max_column + 1)):
-                continue
-
-            reg_id  = str(ws.cell(row=row_idx, column=IDX_REG_ID + 1).value or '').strip()
-            event   = str(ws.cell(row=row_idx, column=IDX_EVENT + 1).value or '').strip()
-            college = str(ws.cell(row=row_idx, column=IDX_COLLEGE + 1).value or '').strip()
-            p1      = str(ws.cell(row=row_idx, column=IDX_P1NAME + 1).value or '').strip()
-            p2      = str(ws.cell(row=row_idx, column=IDX_P2NAME + 1).value or '').strip()
-            reg_on  = str(ws.cell(row=row_idx, column=IDX_REG_TIME + 1).value or '').strip()
-
-            # Regulate missing or placeholder Reg IDs
-            if not reg_id or reg_id == 'DV26-MIG-XXXXX':
-                reg_id = gen_reg_id(event or 'Pitch The Deck')
-                ws.cell(row=row_idx, column=IDX_REG_ID + 1).value = reg_id
-                excel_changed = True
-
-            team = f"{p1} & {p2}" if p2 else p1
+    # 1. Primary Sync from Supabase Cloud DB
+    db_rows = db_get_registrations()
+    if db_rows:
+        for r in db_rows:
+            reg_id  = str(r.get('reg_id', '')).strip()
+            if not reg_id: continue
+            event   = str(r.get('event', '')).strip()
+            college = str(r.get('college', '')).strip()
+            p1      = str(r.get('p1name', '')).strip()
+            p2      = str(r.get('p2name', '')).strip()
+            reg_on  = str(r.get('created_at', ''))[:16].replace('T', ' ') if r.get('created_at') else ''
+            team    = f"{p1} & {p2}" if p2 else p1
 
             if reg_id in existing:
-                # Update info while keeping points intact
                 existing[reg_id]['event']   = event
                 existing[reg_id]['college'] = college
                 existing[reg_id]['team']    = team
                 new_entries.append(existing[reg_id])
             else:
-                # Add new registration with 0 initial points
                 entry = {
                     'id':        lb_data.get('next_id', 1),
                     'reg_id':    reg_id,
@@ -250,9 +234,6 @@ def sync_registrations_to_lb(lb_data):
                 }
                 lb_data['next_id'] = lb_data.get('next_id', 1) + 1
                 new_entries.append(entry)
-
-        if excel_changed:
-            wb.save(EXCEL_PATH)
 
         # Retain manual entries if any don't have reg_id
         for entry in lb_data.get('entries', []):
@@ -874,10 +855,12 @@ def api_delete_registration(reg_id):
 def api_lb_get():
     return jsonify(load_lb())
 
-@app.route('/api/admin/leaderboard/add', methods=['POST'])
+@app.route('/api/admin/leaderboard/add', methods=['POST', 'OPTIONS'])
 @admin_required
 def api_lb_add():
-    d    = request.get_json(force=True) or {}
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
+    d    = request.get_json(force=True, silent=True) or {}
     data = load_lb()
     entry = {
         'id':        data['next_id'],
@@ -893,25 +876,29 @@ def api_lb_add():
     save_lb(data)
     return jsonify({'success':True,'entry':entry})
 
-@app.route('/api/admin/leaderboard/<int:entry_id>', methods=['PUT'])
+@app.route('/api/admin/leaderboard/<int:entry_id>', methods=['PUT', 'OPTIONS'])
 @admin_required
 def api_lb_update(entry_id):
-    d = request.get_json(force=True) or {}
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
+    d = request.get_json(force=True, silent=True) or {}
     data = load_lb()
     for entry in data['entries']:
         if entry['id'] == entry_id:
-            entry['event']     = d.get('event',   entry['event'])
-            entry['college']   = d.get('college', entry['college'])
-            entry['team']      = d.get('team',    entry['team'])
-            entry['score']     = int(d.get('score', entry['score']))
+            if 'event' in d:   entry['event']   = d['event']
+            if 'college' in d: entry['college'] = d['college']
+            if 'team' in d:    entry['team']    = d['team']
+            if 'score' in d:   entry['score']   = int(d['score'])
             entry['timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M')
             save_lb(data)
             return jsonify({'success':True,'entry':entry})
     return jsonify({'success':False,'error':'Not found'}), 404
 
-@app.route('/api/admin/leaderboard/<int:entry_id>', methods=['DELETE'])
+@app.route('/api/admin/leaderboard/<int:entry_id>', methods=['DELETE', 'OPTIONS'])
 @admin_required
 def api_lb_delete(entry_id):
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     data   = load_lb()
     before = len(data['entries'])
     data['entries'] = [e for e in data['entries'] if e['id'] != entry_id]
