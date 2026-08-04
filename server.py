@@ -53,7 +53,6 @@ EVENT_CODES = {
     'Plot Perfect':   'PPF',
     'One Piece':      'OPC',
     'Thinkathon':     'THK',
-    'Treasure Hunt':  'TRH',
     'Pitch Perfect':  'PPR'
 }
 EVENTS = list(EVENT_CODES.keys())
@@ -99,7 +98,8 @@ except Exception:
 
 # ── Registration ID ───────────────────────────────────
 def gen_reg_id(event):
-    code   = EVENT_CODES.get(event, 'EVT')
+    if event == 'Treasure Hunt': event = 'One Piece'
+    code   = EVENT_CODES.get(event, 'OPC' if 'Piece' in str(event) else 'EVT')
     suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     return f'DV26-{code}-{suffix}'
 
@@ -793,6 +793,7 @@ def api_registrations():
             ]
             rows.append(rl)
             ev = r.get('event', '')
+            if ev == 'Treasure Hunt': ev = 'One Piece'
             st = r.get('status', 'Pending')
             counts[ev] = counts.get(ev, 0) + 1
             if st == 'Checked In':
