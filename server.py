@@ -788,35 +788,53 @@ def api_registrations():
     return jsonify({'headers':headers,'rows':rows,'total':len(rows),
                     'counts':counts,'checkin_counts':checkin_counts})
 
-@app.route('/api/admin/download')
+@app.route('/api/admin/download', methods=['GET', 'OPTIONS'])
 @admin_required
 def api_download():
-    import io
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = 'Registrations'
-    headers = ['S.No', 'Reg. ID', 'Event', 'College', 'Department', 'Participant 1 Name', 'Participant 1 Email', 'Participant 2 Name', 'Participant 2 Email', 'Phone', 'Registered On', 'Check-In Status', 'Check-In Time']
-    ws.append(headers)
-    
-    db_rows = db_get_registrations()
-    if db_rows:
-        for idx, r in enumerate(db_rows, start=1):
-            created_str = r.get('created_at', '')
-            if created_str and 'T' in created_str:
-                created_str = created_str[:16].replace('T', ' ')
-            ws.append([
-                idx, r.get('reg_id',''), r.get('event',''), r.get('college',''),
-                r.get('department',''), r.get('p1name',''), r.get('p1email',''),
-                r.get('p2name',''), r.get('p2email',''), r.get('phone',''),
-                created_str, r.get('status','Pending'), r.get('checkin_time','')
-            ])
-            style_data_row(ws, ws.max_row)
-    
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
-    return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                     as_attachment=True, download_name='DataVista26_Registrations.xlsx')
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
+    try:
+        import io
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'Registrations'
+        headers = ['S.No', 'Reg. ID', 'Event', 'College', 'Department', 'Participant 1 Name', 'Participant 1 Email', 'Participant 2 Name', 'Participant 2 Email', 'Phone', 'Registered On', 'Check-In Status', 'Check-In Time']
+        ws.append(headers)
+        
+        db_rows = db_get_registrations()
+        if db_rows:
+            for idx, r in enumerate(db_rows, start=1):
+                created_str = str(r.get('created_at', '') or '')
+                if created_str and 'T' in created_str:
+                    created_str = created_str[:16].replace('T', ' ')
+                ws.append([
+                    idx,
+                    str(r.get('reg_id','') or ''),
+                    str(r.get('event','') or ''),
+                    str(r.get('college','') or ''),
+                    str(r.get('department','') or ''),
+                    str(r.get('p1name','') or ''),
+                    str(r.get('p1email','') or ''),
+                    str(r.get('p2name','') or ''),
+                    str(r.get('p2email','') or ''),
+                    str(r.get('phone','') or ''),
+                    created_str,
+                    str(r.get('status','Pending') or 'Pending'),
+                    str(r.get('checkin_time','') or '')
+                ])
+                try: style_data_row(ws, ws.max_row)
+                except Exception: pass
+        
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         as_attachment=True, download_name='DataVista26_Registrations.xlsx')
+    except Exception as e:
+        import traceback
+        print('  [DOWNLOAD ERROR]:', e)
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/registrations/<reg_id>', methods=['DELETE', 'OPTIONS'])
 @admin_required
