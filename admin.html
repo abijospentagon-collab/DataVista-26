@@ -561,9 +561,7 @@
 <script>
 const API_BASE = (function() {
     if (window.RENDER_API_URL) return window.RENDER_API_URL.replace(/\/$/, '');
-    if (window.location.port === '5000' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return '';
-    }
+    if (window.location.hostname.includes('onrender.com')) return '';
     return 'https://datavista-26.onrender.com';
 })();
 
