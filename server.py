@@ -854,9 +854,12 @@ def api_download():
         
         buf = io.BytesIO()
         wb.save(buf)
-        buf.seek(0)
-        return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                         as_attachment=True, download_name='DataVista26_Registrations.xlsx')
+        excel_data = buf.getvalue()
+
+        response = make_response(excel_data)
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = 'attachment; filename=DataVista26_Registrations.xlsx'
+        return response
     except Exception as e:
         import traceback
         print('  [DOWNLOAD ERROR]:', e)
