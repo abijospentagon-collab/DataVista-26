@@ -601,7 +601,7 @@ function getAdminHeaders() {
 // ═══════════════════════════════════════════════
 //  LOGIN
 // ═══════════════════════════════════════════════
-document.getElementById('login-form').addEventListener('submit', async function(e) {
+document.getElementById('login-form')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     const errBox = document.getElementById('login-error');
     const btn    = document.getElementById('login-btn');
@@ -712,28 +712,37 @@ async function loadData() {
 
         // Total check-in count
         const totalPresent = Object.values(checkinCounts).reduce((a,b)=>a+b,0);
-        document.getElementById('stat-total').textContent = json.total || 0;
-        document.querySelector('.stat-card.total .stat-sub').textContent =
-            `${totalPresent} checked in so far`;
+        const statTotal = document.getElementById('stat-total');
+        if (statTotal) statTotal.textContent = json.total || 0;
+        const totalSub = document.querySelector('.stat-card.total .stat-sub');
+        if (totalSub) totalSub.textContent = `${totalPresent} checked in so far`;
 
         renderTable(allRows);
-    } catch { document.getElementById('count-label').textContent = 'Failed to load.'; }
+    } catch (err) {
+        console.error('loadData error:', err);
+        const label = document.getElementById('count-label');
+        if (label) label.textContent = '0 entries';
+        renderTable([]);
+    }
 }
 
 function renderTable(rows) {
     const tbody = document.getElementById('table-body');
     const empty = document.getElementById('empty-state');
     const label = document.getElementById('count-label');
+    const emptyText = document.getElementById('empty-text');
+    if (!tbody) return;
     tbody.innerHTML = '';
     if (!rows.length) {
-        empty.style.display = 'flex';
-        document.getElementById('empty-text').textContent =
-            (document.getElementById('search-input').value || document.getElementById('event-filter').value)
-            ? 'No registrations match your filter.' : 'No registrations yet.';
-        label.textContent = '0 entries'; return;
+        if (empty) empty.style.display = 'flex';
+        const q  = document.getElementById('search-input')?.value || '';
+        const ev = document.getElementById('event-filter')?.value || '';
+        if (emptyText) emptyText.textContent = (q || ev) ? 'No registrations match your filter.' : 'No registrations yet.';
+        if (label) label.textContent = '0 entries';
+        return;
     }
-    empty.style.display = 'none';
-    label.textContent = `${rows.length} entr${rows.length===1?'y':'ies'}`;
+    if (empty) empty.style.display = 'none';
+    if (label) label.textContent = `${rows.length} entr${rows.length===1?'y':'ies'}`;
     rows.forEach(row => {
         const tr    = document.createElement('tr');
         const regId = row[1] || '';
@@ -1105,7 +1114,7 @@ document.getElementById('lb-search-input')?.addEventListener('input', renderLbTa
 // ═══════════════════════════════════════════════
 //  LOGOUT
 // ═══════════════════════════════════════════════
-document.getElementById('logout-btn').addEventListener('click', async function() {
+document.getElementById('logout-btn')?.addEventListener('click', async function() {
     localStorage.removeItem('admin_token');
     sessionStorage.removeItem('admin_logged_in');
     if (autoSyncTimer) clearInterval(autoSyncTimer);
