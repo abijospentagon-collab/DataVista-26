@@ -598,8 +598,10 @@ def static_files(filename):
     return send_from_directory(BASE_DIR, filename)
 
 # ── Registration API ──────────────────────────────────
-@app.route('/api/register', methods=['POST'])
+@app.route('/api/register', methods=['POST', 'OPTIONS'])
 def api_register():
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     try:
         d = request.get_json(force=True, silent=True) or {}
         required = ['event','college','department','p1name','phone']
@@ -790,9 +792,11 @@ def api_logout():
     return jsonify({'success':True})
 
 # ── Admin registrations ───────────────────────────────
-@app.route('/api/admin/registrations')
+@app.route('/api/admin/registrations', methods=['GET', 'OPTIONS'])
 @admin_required
 def api_registrations():
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     headers = ['S.No', 'Reg. ID', 'Event', 'College', 'Department', 'Participant 1 Name', 'Participant 1 Email', 'Participant 2 Name', 'Participant 2 Email', 'Phone', 'Registered On', 'Check-In Status', 'Check-In Time']
     rows, counts, checkin_counts = [], {}, {}
 
@@ -924,9 +928,11 @@ def api_delete_registration(reg_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # ── Admin leaderboard CRUD ────────────────────────────
-@app.route('/api/admin/leaderboard', methods=['GET'])
+@app.route('/api/admin/leaderboard', methods=['GET', 'OPTIONS'])
 @admin_required
 def api_lb_get():
+    if request.method == 'OPTIONS':
+        return jsonify({'success': True}), 200
     return jsonify(load_lb())
 
 @app.route('/api/admin/leaderboard/add', methods=['POST', 'OPTIONS'])
