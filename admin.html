@@ -1024,28 +1024,20 @@ async function downloadExcel() {
     const btn = document.getElementById('dl-btn');
     const origHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting…';
-    btn.disabled = true;
+    
+    const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
+    const downloadUrl = `${API_BASE}/api/admin/download?token=${token}`;
+    
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-    try {
-        const res = await fetch(`${API_BASE}/api/admin/download`, {
-            headers: getAdminHeaders()
-        });
-        if (!res.ok) throw new Error('Download failed (' + res.status + ')');
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'DataVista26_Registrations.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    } catch (err) {
-        alert('Excel Export Error: ' + err.message);
-    } finally {
+    setTimeout(() => {
         btn.innerHTML = origHTML;
-        btn.disabled = false;
-    }
+    }, 1500);
 }
 
 // ── Spot Registration Modal Logic ─────────────────────

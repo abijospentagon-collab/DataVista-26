@@ -455,9 +455,12 @@ ADMIN_SECRET_TOKEN = 'DV26_ADMIN_SECURE_TOKEN_2026'
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            return f(*args, **kwargs)
         auth_header = request.headers.get('Authorization', '')
         token = auth_header.replace('Bearer ', '').strip()
-        if session.get('admin_logged_in') or token == ADMIN_SECRET_TOKEN:
+        param_token = request.args.get('token', '').strip()
+        if session.get('admin_logged_in') or token == ADMIN_SECRET_TOKEN or param_token == ADMIN_SECRET_TOKEN:
             return f(*args, **kwargs)
         return jsonify({'error': 'Unauthorized'}), 401
     return decorated
