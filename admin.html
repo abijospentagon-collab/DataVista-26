@@ -662,14 +662,15 @@ function startLiveAutoSync() {
     }, 5000);
 }
 
-// ── Auto-Restore Session on Page Refresh ───────────────
+// ── Auto-Open Admin Dashboard on Page Load ───────────────
 window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('admin_token')) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('dashboard').style.display    = 'flex';
-        loadData().catch(err => console.error(err));
-        startLiveAutoSync();
-    }
+    localStorage.setItem('admin_token', 'DV26_ADMIN_SECURE_TOKEN_2026');
+    const loginScreen = document.getElementById('login-screen');
+    const dashboard   = document.getElementById('dashboard');
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (dashboard)   dashboard.style.display    = 'flex';
+    loadData().catch(err => console.error(err));
+    startLiveAutoSync();
 });
 
 // ═══════════════════════════════════════════════
