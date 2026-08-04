@@ -1020,7 +1020,7 @@ document.getElementById('logout-btn').addEventListener('click', async function()
 });
 
 // ── Authenticated Excel Download ──────────────────────
-async function downloadExcel() {
+function downloadExcel() {
     const btn = document.getElementById('dl-btn');
     const origHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting…';
@@ -1028,16 +1028,11 @@ async function downloadExcel() {
     const token = localStorage.getItem('admin_token') || 'DV26_ADMIN_SECURE_TOKEN_2026';
     const downloadUrl = `${API_BASE}/api/admin/download?token=${token}`;
     
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    window.location.href = downloadUrl;
 
     setTimeout(() => {
         btn.innerHTML = origHTML;
-    }, 1500);
+    }, 2000);
 }
 
 // ── Spot Registration Modal Logic ─────────────────────
