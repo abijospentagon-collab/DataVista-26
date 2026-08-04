@@ -924,15 +924,16 @@ def api_lb_add():
     save_lb(data)
     return jsonify({'success':True,'entry':entry})
 
-@app.route('/api/admin/leaderboard/<int:entry_id>', methods=['PUT', 'OPTIONS'])
+@app.route('/api/admin/leaderboard/<entry_id>', methods=['PUT', 'OPTIONS'])
 @admin_required
 def api_lb_update(entry_id):
     if request.method == 'OPTIONS':
         return jsonify({'success': True}), 200
     d = request.get_json(force=True, silent=True) or {}
     data = load_lb()
+    target_str = str(entry_id).strip().upper()
     for entry in data['entries']:
-        if entry['id'] == entry_id:
+        if str(entry.get('id')) == target_str or str(entry.get('reg_id','')).strip().upper() == target_str:
             if 'event' in d:   entry['event']   = d['event']
             if 'college' in d: entry['college'] = d['college']
             if 'team' in d:    entry['team']    = d['team']

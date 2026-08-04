@@ -571,7 +571,10 @@ function startLiveAutoSync() {
     autoSyncTimer = setInterval(() => {
         const activeTab = document.querySelector('.dash-tab.active')?.id;
         if (activeTab === 'tab-lb') {
-            loadLb();
+            const isEditingInput = document.activeElement && document.activeElement.classList.contains('edit-score');
+            if (!editingLbId && !isEditingInput) {
+                loadLb();
+            }
         } else {
             loadData();
         }
@@ -834,6 +837,7 @@ function renderLbTable() {
                 <td>
                     <input type="number" class="edit-input edit-score" id="lb-score-val-${entry.id}"
                         value="${entry.score || 0}" min="0" max="9999"
+                        onchange="savePoints(${entry.id}, this)"
                         onkeydown="if(event.key==='Enter') savePoints(${entry.id}, this)">
                 </td>
                 <td style="color:var(--text-muted);font-size:.75rem;white-space:nowrap">${entry.timestamp || '—'}</td>
@@ -856,17 +860,24 @@ function renderLbTable() {
 }
 
 // ── Save Points Quick ────────────────────────────
-async function savePoints(id, btnEl) {
-    const inputEl  = document.getElementById(`lb-score-val-${id}`);
+async function savePoints(id, el) {
+    const inputEl = document.getElementById(`lb-score-val-${id}`);
+    if (!inputEl) return;
     const scoreVal = parseInt(inputEl.value, 10);
-    if (isNaN(scoreVal) || scoreVal < 0) {
-        alert('Please enter a valid non-negative score.');
-        return;
+    if (isNaN(scoreVal) || scoreVal < 0) return;
+
+    let btnEl = null;
+    if (el && el.tagName === 'BUTTON') {
+        btnEl = el;
+    } else if (inputEl.closest('tr')) {
+        btnEl = inputEl.closest('tr').querySelector('.btn-edit');
     }
 
-    const origHtml = btnEl.innerHTML;
-    btnEl.disabled = true;
-    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    const origHtml = btnEl ? btnEl.innerHTML : '';
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
 
     try {
         const res = await fetch(`${API_BASE}/api/admin/leaderboard/${id}`, {
@@ -878,16 +889,24 @@ async function savePoints(id, btnEl) {
         if (json.success) {
             const idx = lbEntries.findIndex(e => e.id === id);
             if (idx !== -1) lbEntries[idx] = json.entry;
-            renderLbTable();
+            
+            // Visual saved glowing green effect
+            inputEl.style.borderColor = '#4ADE80';
+            inputEl.style.boxShadow = '0 0 10px rgba(74,222,128,0.6)';
+            setTimeout(() => {
+                inputEl.style.borderColor = '';
+                inputEl.style.boxShadow = '';
+            }, 1200);
         } else {
             alert('Failed to save points: ' + (json.error || 'Unknown error'));
-            btnEl.disabled = false;
-            btnEl.innerHTML = origHtml;
         }
     } catch {
         alert('Server connection error.');
-        btnEl.disabled = false;
-        btnEl.innerHTML = origHtml;
+    } finally {
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
     }
 }
 
