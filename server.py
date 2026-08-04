@@ -210,6 +210,11 @@ def sync_registrations_to_lb(lb_data):
             for r in db_rows:
                 reg_id  = str(r.get('reg_id', '')).strip()
                 if not reg_id: continue
+                status  = str(r.get('status', 'Pending')).strip()
+                
+                # ONLY include participants who have CHECKED IN
+                if status != 'Checked In':
+                    continue
                 event   = str(r.get('event', '')).strip()
                 college = str(r.get('college', '')).strip()
                 p1      = str(r.get('p1name', '')).strip()
@@ -603,58 +608,75 @@ def static_files(filename):
 @app.route('/api/register', methods=['POST'])
 def api_register():
     try:
-        d = request.get_json(force=True) or {}
-        required = ['event','college','department','p1name','p1email','p2name','p2email','phone']
+        d = request.get_json(force=True, silent=True) or {}
+        required = ['event','college','department','p1name','phone']
         for f in required:
-            if not d.get(f,'').strip():
+            if not str(d.get(f,'') or '').strip():
                 return jsonify({'success':False,'error':f'Missing: {f}'}), 400
 
-        reg_id      = gen_reg_id(d['event'].strip())
-        checkin_url = f'{get_checkin_base()}/checkin/{reg_id}'
+        event_name = str(d.get('event','')).strip()
+        college    = str(d.get('college','')).strip()
+        dept       = str(d.get('department','')).strip()
+        p1name     = str(d.get('p1name','')).strip()
+        p1email    = str(d.get('p1email','') or '').strip()
+        p2name     = str(d.get('p2name','') or '').strip()
+        p2email    = str(d.get('p2email','') or '').strip()
+        phone      = str(d.get('phone','')).strip()
+        
+        is_spot    = d.get('is_spot') or (p1email and 'spot@' in p1email)
+        status_val = 'Checked In' if is_spot else 'Pending'
+        chk_time   = datetime.now().strftime('%d-%m-%Y %H:%M:%S') if is_spot else ''
 
-        wb  = openpyxl.load_workbook(EXCEL_PATH)
-        ws  = wb.active
-        sno = ws.max_row
+        reg_id      = gen_reg_id(event_name)
+        checkin_url = f'{get_checkin_base()}/checkin/{reg_id}'
 
         # Insert into Supabase Cloud Database (Permanent)
         db_insert_registration({
             'reg_id': reg_id,
-            'event': d['event'].strip(),
-            'college': d['college'].strip(),
-            'department': d['department'].strip(),
-            'p1name': d['p1name'].strip(),
-            'p1email': d['p1email'].strip(),
-            'p2name': d['p2name'].strip(),
-            'p2email': d['p2email'].strip(),
-            'phone': d['phone'].strip(),
-            'status': 'Pending',
-            'checkin_time': ''
+            'event': event_name,
+            'college': college,
+            'department': dept,
+            'p1name': p1name,
+            'p1email': p1email,
+            'p2name': p2name,
+            'p2email': p2email,
+            'phone': phone,
+            'status': status_val,
+            'checkin_time': chk_time
         })
 
-        ws.append([
-            sno, reg_id,
-            d['event'].strip(), d['college'].strip(), d['department'].strip(),
-            d['p1name'].strip(), d['p1email'].strip(),
-            d['p2name'].strip(), d['p2email'].strip(),
-            d['phone'].strip(),
-            datetime.now().strftime('%d-%m-%Y %H:%M'),
-            'Pending', ''
-        ])
-        style_data_row(ws, ws.max_row)
-        try: wb.save(EXCEL_PATH)
+        try:
+            wb  = openpyxl.load_workbook(EXCEL_PATH)
+            ws  = wb.active
+            sno = ws.max_row
+            ws.append([
+                sno, reg_id,
+                event_name, college, dept,
+                p1name, p1email,
+                p2name, p2email,
+                phone,
+                datetime.now().strftime('%d-%m-%Y %H:%M'),
+                status_val, chk_time
+            ])
+            style_data_row(ws, ws.max_row)
+            wb.save(EXCEL_PATH)
         except Exception as ex: print('Excel save warn:', ex)
 
-        # Auto-sync new registration to Leaderboard
+        # Auto-sync Leaderboard
         load_lb()
 
         import re
         email_pattern = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
-        raw_emails = [d['p1email'].strip(), d['p2email'].strip()]
-        to_list = list(set([e for e in raw_emails if email_pattern.match(e)]))
+        raw_emails = [p1email, p2email]
+        to_list = list(set([e for e in raw_emails if e and email_pattern.match(e)]))
 
         email_sent = False
         if to_list:
-            send_confirmation_async(to_list, d, reg_id)
+            send_confirmation_async(to_list, {
+                'event': event_name, 'college': college, 'department': dept,
+                'p1name': p1name, 'p1email': p1email, 'p2name': p2name, 'p2email': p2email,
+                'phone': phone
+            }, reg_id)
             email_sent = True
 
         return jsonify({'success':True, 'reg_id':reg_id, 'email_sent':email_sent})

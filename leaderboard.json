@@ -1,5 +1,33 @@
 {
-  "entries": [],
-  "next_id": 2,
-  "last_updated": "02-08-2026 16:28"
+  "entries": [
+    {
+      "id": 2,
+      "reg_id": "DV26-PTD-03SB0",
+      "event": "Pitch The Deck",
+      "college": "MCC",
+      "team": "Rachel Priya & Mouritha",
+      "score": 11,
+      "timestamp": "2026-08-04 03:20"
+    },
+    {
+      "id": 3,
+      "reg_id": "DV26-PTD-ISPXJ",
+      "event": "Pitch The Deck",
+      "college": "Test College",
+      "team": "Spot Tester",
+      "score": 0,
+      "timestamp": "2026-08-04 04:06"
+    },
+    {
+      "id": 4,
+      "reg_id": "DV26-PTD-CP1RJ",
+      "event": "Pitch The Deck",
+      "college": "Test College",
+      "team": "Spot Tester",
+      "score": 0,
+      "timestamp": "2026-08-04 04:06"
+    }
+  ],
+  "next_id": 5,
+  "last_updated": "04-08-2026 09:36"
 }
